@@ -1,0 +1,3204 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String         @id @default(cuid())
+  email           String         @unique
+  passwordHash    String
+  name            String
+  phone           String?
+  role            String         @default("REGISTERED_MEMBER") // GUEST, REGISTERED_MEMBER, PAID_MEMBER, AUTHOR, CONTRIBUTOR, REVIEWER, EDITOR, PUBLISHER, STORE_MANAGER, CUSTOMER_SUPPORT, MODERATOR, FINANCE_MANAGER, ADMIN, SUPER_ADMIN
+  avatarUrl       String?
+  bio             String?
+  isVerified      Boolean        @default(false)
+  username        String?        @unique
+  dateOfBirth     String?
+  gender          String?        // MALE, FEMALE, OTHER
+  status          String         @default("ACTIVE") // ACTIVE, INACTIVE, PENDING_VERIFICATION, SUSPENDED, BLOCKED
+  isPhoneVerified Boolean        @default(false)
+  lastLoginAt     DateTime?
+  customerType    String         @default("INDIVIDUAL") // INDIVIDUAL, BUSINESS, INSTITUTIONAL, WHOLESALE
+  customerTags    String?        // JSON string e.g. ["VIP", "Regular", "High Value"]
+  adminNotes      String?        // Internal notes for admin
+  country         String?        @default("Bangladesh")
+  division        String?
+  city            String?
+  area            String?
+  postalCode      String?
+  fullAddress     String?
+  membershipTier  String         @default("FREE") // FREE, DIGITAL, PREMIUM, INSTITUTIONAL
+  membershipExpiry DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  orders          Order[]
+  reviews         Review[]
+  comments        Comment[]
+  questions       Question[]
+  answers         Answer[]
+  votes           Vote[]
+  bookmarks       Bookmark[]
+  readingProgress ReadingProgress[]
+  entitlements    DigitalEntitlement[]
+  subscriptions   Subscription[]
+  submissions     Submission[]
+  notifications   Notification[]
+  auditLogs       AuditLog[]
+  authorProfile   Author?
+  publisherProfile Publisher?
+  vendorMembers   VendorMember[]
+  donations       Donation[]
+  vendorApps      VendorApplication[]
+  supportTickets  SupportTicket[]
+  ticketResponses TicketResponse[]
+  addresses       Address[]
+  returnRequests  ReturnRequest[]
+  aiConversations AiConversation[]
+  aiUsageLogs     AiUsageLog[]
+  pushSubscriptions PushSubscription[]
+  pushPreferences PushNotificationPreference[]
+  pushLogs        PushNotificationLog[]
+  readingSessions     ReadingSession[]
+  publicationDownloads PublicationDownload[]
+  publicationShares   PublicationShare[]
+  issueReadingProgress IssueReadingProgress[]
+  publisherMemberships  PublisherMember[]
+  publicationMemberships PublicationMember[]
+  publicationSubscriptions PublicationSubscription[]
+  publicationAuditLogs  PublicationAuditLog[]
+
+  // Administrative Staff & HRMS Relations
+  staffProfile          StaffProfile?
+  createdTasks          StaffTask[]           @relation("TaskCreator")
+  assignedTasks         StaffTask[]           @relation("TaskAssignee")
+  taskComments          StaffTaskComment[]
+  requestedApprovals    StaffApproval[]       @relation("ApprovalRequester")
+  reviewedApprovals     StaffApproval[]       @relation("ApprovalReviewer")
+  headOfDepartments     Department[]          @relation("DepartmentHead")
+  approvedLeaves        StaffLeaveRequest[]   @relation("LeaveApprover")
+
+  // Shubban Ads Network Relations
+  advertisersOwned      Advertiser[]          @relation("AdvertiserOwner")
+  advertiserMemberships AdvertiserMember[]
+  createdAdCampaigns    AdCampaign[]          @relation("CampaignCreator")
+  approvedAdCampaigns   AdCampaign[]          @relation("CampaignApprover")
+  approvedAdCreatives   AdCreative[]          @relation("CreativeApprover")
+  adStaffAssignments   AdStaffAssignment[]   @relation("StaffAdAssignee")
+  adAuditLogs           AdAuditLog[]          @relation("AdAuditActor")
+
+  @@index([role])
+  @@index([status])
+  @@index([createdAt])
+  @@index([customerType])
+}
+
+model CustomerTag {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  color       String   @default("#6B7280")
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Author {
+  id             String          @id @default(cuid())
+  name           String
+  nameEn         String?
+  slug           String          @unique
+  bio            String?
+  bioDetails     String?
+  photoUrl       String?
+  designation    String?
+  email          String?
+  phone          String?
+  expertise      String?
+  workplace      String?
+  education      String?
+  experience     String?
+  awards         String?
+  facebook       String?
+  linkedin       String?
+  twitter        String?
+  instagram      String?
+  youtube        String?
+  website        String?
+  status         String          @default("ACTIVE") // ACTIVE, INACTIVE, DRAFT, PENDING_REVIEW
+  isActive       Boolean         @default(true)
+  isFeatured     Boolean         @default(false)
+  isVerified     Boolean         @default(false)
+  seoTitle       String?
+  seoDescription String?
+  ogImage        String?
+  userId         String?         @unique
+  user           User?           @relation(fields: [userId], references: [id])
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  books          Book[]
+  articles       Article[]
+  papers         ResearchPaper[]
+
+  @@index([slug])
+  @@index([status])
+  @@index([isActive])
+}
+
+model Publisher {
+  id                 String     @id @default(cuid())
+  name               String
+  nameEn             String?
+  slug               String     @unique
+  logoUrl            String?
+  publisherType      String?    @default("COMMERCIAL") // COMMERCIAL, ISLAMIC_FOUNDATION, ACADEMIC_PRESS, GOVERNMENT, INDEPENDENT
+  description        String?
+  descriptionDetails String?
+  contactPerson      String?
+  email              String?
+  phone              String?
+  altPhone           String?
+  website            String?
+  country            String?    @default("বাংলাদেশ")
+  division           String?
+  city               String?
+  postalCode         String?
+  address            String?
+  regNumber          String?
+  binNumber          String?
+  establishedYear    Int?
+  organizationType   String?    @default("LIMITED") // LIMITED, PROPRIETORSHIP, TRUST, SOCIETY, NGO
+  mainCategory       String?
+  specialization     String?
+  facebook           String?
+  linkedin           String?
+  twitter            String?
+  instagram          String?
+  youtube            String?
+  status             String     @default("ACTIVE") // ACTIVE, INACTIVE, PENDING_VERIFICATION, SUSPENDED
+  isActive           Boolean    @default(true)
+  isVerified         Boolean    @default(false)
+  isFeatured         Boolean    @default(false)
+  seoTitle           String?
+  seoDescription     String?
+  ogImage            String?
+  userId             String?    @unique
+  user               User?      @relation(fields: [userId], references: [id])
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  books              Book[]
+  magazines          Magazine[]
+  members            PublisherMember[]
+  auditLogs          PublicationAuditLog[]
+
+  @@index([slug])
+  @@index([status])
+  @@index([isActive])
+  @@index([isVerified])
+}
+
+model Category {
+  id             String     @id @default(cuid())
+  name           String
+  nameEn         String?
+  slug           String     @unique
+  description    String?
+  icon           String?
+  image          String?
+  type           String     @default("BOOK") // BOOK, ARTICLE, MAGAZINE, RESEARCH, QUESTION
+  parentId       String?
+  isActive       Boolean    @default(true)
+  displayOrder   Int        @default(0)
+  seoTitle       String?
+  seoDescription String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  books          Book[]
+  articles       Article[]
+  magazines      Magazine[]
+  questions      Question[]
+
+  @@index([slug])
+  @@index([type])
+  @@index([parentId])
+  @@index([isActive])
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  createdAt DateTime @default(now())
+}
+
+model Book {
+  id              String      @id @default(cuid())
+  title           String
+  titleEn         String?
+  slug            String      @unique
+  isbn            String?
+  edition         String?
+  language        String      @default("bn") // bn, en
+  pages           Int?
+  bindingType     String?     // Hardcover, Paperback
+  description     String
+  synopsis        String?
+  toc             String?     // Table of Contents
+  price           Float       // Physical book price
+  discountPrice   Float?
+  stockQuantity   Int         @default(10)
+  isPhysicalAvailable Boolean @default(true)
+  isDigitalAvailable  Boolean @default(false)
+  isFree          Boolean     @default(false)
+  coverImage      String
+  samplePdfUrl    String?
+  fullPdfUrl      String?
+  pdfFileSize     String?
+  authorId        String
+  author          Author      @relation(fields: [authorId], references: [id])
+  publisherId     String?
+  publisher       Publisher?  @relation(fields: [publisherId], references: [id])
+  categoryId      String
+  category        Category    @relation(fields: [categoryId], references: [id])
+  vendorId        String?
+  vendor          Vendor?     @relation(fields: [vendorId], references: [id])
+  isFeatured      Boolean     @default(false)
+  isNewArrival    Boolean     @default(true)
+  isBestSeller    Boolean     @default(false)
+  isEditorsPick   Boolean     @default(false)
+  publishedYear   String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  orderItems      OrderItem[]
+  reviews         Review[]
+  bookmarks       Bookmark[]
+  readingProgress ReadingProgress[]
+  entitlements    DigitalEntitlement[]
+  variants        ProductVariant[]
+  attributeAssignments ProductAttributeAssignment[]
+  vendorProducts  VendorProduct[]
+  returnItems     ReturnItem[]
+
+  @@index([categoryId])
+  @@index([authorId])
+  @@index([publisherId])
+  @@index([vendorId])
+  @@index([isFeatured, createdAt])
+  @@index([isNewArrival, createdAt])
+  @@index([isBestSeller, createdAt])
+  @@index([isFree, isDigitalAvailable])
+  @@index([price])
+  @@index([stockQuantity])
+}
+
+model Magazine {
+  id               String             @id @default(cuid())
+  title            String
+  titleEn          String?
+  slug             String             @unique
+  frequency        String             @default("MONTHLY") // WEEKLY, MONTHLY, QUARTERLY, ANNUAL
+  description      String
+  coverImage       String
+  editor           String?
+  editorialMessage String?
+  month            String?
+  year             Int?
+  volume           String?
+  issueNumber      String?
+  language         String?            @default("bn") // bn, ar, en
+  tags             String?
+  seoTitle         String?
+  metaDescription  String?
+  status           String             @default("PUBLISHED") // DRAFT, PUBLISHED, SCHEDULED, ARCHIVED
+  publisherId      String?
+  publisher        Publisher?         @relation(fields: [publisherId], references: [id])
+  categoryId       String
+  category         Category           @relation(fields: [categoryId], references: [id])
+  isFeatured       Boolean            @default(false)
+  themeColor       String?            @default("#c59b27")
+  logoUrl          String?
+  bannerUrl        String?
+  subdomain        String?
+  website          String?
+  email            String?
+  phone            String?
+  establishedYear  Int?
+  isSubscribable   Boolean            @default(false)
+  singleIssuePrice Float              @default(0)
+  monthlySubscriptionPrice Float      @default(0)
+  annualSubscriptionPrice Float       @default(0)
+  totalSubscribers Int                @default(0)
+  totalRevenue     Float              @default(0)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  issues            PublicationIssue[]
+  articles          Article[]
+  members           PublicationMember[]
+  schedule          PublicationSchedule?
+  subscriptionPlans PublicationSubscriptionPlan[]
+  subscriptions     PublicationSubscription[]
+  rights            PublicationRights[]
+  auditLogs         PublicationAuditLog[]
+  magazineSettings  MagazineSetting[]
+
+  @@index([slug])
+  @@index([categoryId])
+  @@index([status])
+}
+
+model PublicationIssue {
+  id               String    @id @default(cuid())
+  magazineId       String
+  magazine         Magazine  @relation(fields: [magazineId], references: [id], onDelete: Cascade)
+  issueTitle       String
+  volume           String?
+  issueNumber      String?
+  publicationDate  DateTime
+  coverImage       String
+  pdfUrl           String
+  fileSize         String?
+  pageCount        Int       @default(0)
+  summary          String?
+  toc              String?
+  authorizedPdfUrl String?
+  allowDownload    Boolean   @default(true)
+  allowShare       Boolean   @default(true)
+  readOnline       Boolean   @default(true)
+  requireLogin     Boolean   @default(false)
+  status           String    @default("PUBLISHED") // DRAFT, PUBLISHED, SCHEDULED, ARCHIVED
+  editorNotes      String?
+  approvedBy       String?
+  approvedAt       DateTime?
+  downloads        Int       @default(0)
+  views            Int       @default(0)
+  isFree           Boolean   @default(false)
+  price            Float     @default(0)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  articles         Article[]
+  entitlements     DigitalEntitlement[]
+  readingSessions  ReadingSession[]
+  downloadsLog     PublicationDownload[]
+  sharesLog        PublicationShare[]
+  readingProgress  IssueReadingProgress[]
+  rights           PublicationRights[]
+
+  @@index([magazineId])
+  @@index([publicationDate])
+  @@index([status])
+}
+
+model Article {
+  id                String            @id @default(cuid())
+  title             String
+  subtitle          String?
+  slug              String            @unique
+  content           String
+  excerpt           String
+  coverImage        String?
+  type              String            @default("ESSAY") // ISLAMIC_ARTICLE, ESSAY, EDITORIAL, RESEARCH_PAPER, ISLAMIC_HISTORY, QURAN_HADITH_RESEARCH, BOOK_REVIEW, INTERVIEW, EDUCATIONAL, MAGAZINE_ARTICLE
+  status            String            @default("PUBLISHED") // DRAFT, REVIEW, SCHEDULED, PUBLISHED, ARCHIVED
+  authorId          String
+  author            Author            @relation(fields: [authorId], references: [id])
+  categoryId        String
+  category          Category          @relation(fields: [categoryId], references: [id])
+  issueId           String?
+  issue             PublicationIssue? @relation(fields: [issueId], references: [id], onDelete: SetNull)
+  magazineId        String?
+  magazine          Magazine?         @relation(fields: [magazineId], references: [id], onDelete: SetNull)
+  editorialStatus   String            @default("PUBLISHED") // DRAFT, IN_REVIEW, REVISION_REQUESTED, APPROVED, PUBLISHED, REJECTED
+  reviewedBy        String?
+  reviewNotes       String?
+  version           Int               @default(1)
+  footnotes         String?           // JSON string of structured footnotes / scholarly citations
+  isFree            Boolean           @default(true)
+  price             Float             @default(0)
+  readingTime       Int               @default(5) // in minutes
+  views             Int               @default(0)
+  isFeatured        Boolean           @default(false)
+  tags              String?
+  arabicContent     String?
+  references        String?
+  relatedBookIds    String?           // JSON array of book IDs
+  relatedArticleIds String?           // JSON array of article IDs
+  metaTitle         String?
+  metaDescription   String?
+  canonicalUrl      String?
+  scheduledAt       DateTime?
+  approvedBy        String?
+  approvedAt        DateTime?
+  publishedAt       DateTime          @default(now())
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  comments          Comment[]
+  bookmarks         Bookmark[]
+  readingSessions   ReadingSession[]
+  downloadsLog      PublicationDownload[]
+  sharesLog         PublicationShare[]
+
+  @@index([authorId])
+  @@index([categoryId])
+  @@index([issueId])
+  @@index([magazineId])
+  @@index([status])
+  @@index([editorialStatus])
+  @@index([type])
+  @@index([publishedAt])
+}
+
+model ReadingSession {
+  id                 String            @id @default(cuid())
+  issueId            String?
+  issue              PublicationIssue? @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  articleId          String?
+  article            Article?          @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  userId             String?
+  user               User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  sessionId          String
+  ipHash             String?
+  deviceType         String?           @default("desktop") // mobile, tablet, desktop
+  browser            String?
+  os                 String?
+  pagesRead          String?           // JSON array of page numbers viewed
+  totalPagesViewed   Int               @default(1)
+  lastPage           Int               @default(1)
+  durationSeconds    Int               @default(0)
+  isMeaningfulReader Boolean           @default(false) // duration >= 30s OR totalPagesViewed >= 3
+  completionRate     Float             @default(0)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  @@index([issueId])
+  @@index([articleId])
+  @@index([sessionId])
+  @@index([createdAt])
+  @@index([isMeaningfulReader])
+}
+
+model PublicationDownload {
+  id        String            @id @default(cuid())
+  issueId   String?
+  issue     PublicationIssue? @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  articleId String?
+  article   Article?          @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  ipHash    String?
+  fileType  String            @default("PDF")
+  fileSize  String?
+  createdAt DateTime          @default(now())
+
+  @@index([issueId])
+  @@index([articleId])
+  @@index([createdAt])
+}
+
+model PublicationShare {
+  id        String            @id @default(cuid())
+  issueId   String?
+  issue     PublicationIssue? @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  articleId String?
+  article   Article?          @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  platform  String            // FACEBOOK, WHATSAPP, TWITTER, COPY_LINK, NATIVE
+  createdAt DateTime          @default(now())
+
+  @@index([issueId])
+  @@index([articleId])
+  @@index([platform])
+  @@index([createdAt])
+}
+
+model IssueReadingProgress {
+  id          String           @id @default(cuid())
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  issueId     String
+  issue       PublicationIssue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  currentPage Int              @default(1)
+  totalPages  Int              @default(1)
+  lastReadAt  DateTime         @default(now())
+
+  @@unique([userId, issueId])
+  @@index([userId])
+  @@index([issueId])
+}
+
+model PublicationFile {
+  id            String    @id @default(cuid())
+  fileName      String
+  fileUrl       String
+  fileSize      String?
+  fileSizeBytes Int       @default(0)
+  mimeType      String    @default("application/pdf")
+  pageCount     Int       @default(0)
+  title         String?
+  storageType   String    @default("LOCAL") // LOCAL, CLOUD, S3
+  isRestricted  Boolean   @default(false)
+  magazineId    String?
+  publisherId   String?
+  checksum      String?
+  uploadedBy    String?
+  downloads     Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([fileName])
+  @@index([storageType])
+  @@index([magazineId])
+  @@index([createdAt])
+}
+
+model PublicationTag {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  color       String?   @default("#c59b27")
+  usageCount  Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([name])
+  @@index([slug])
+}
+
+model PublicationSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  updatedAt   DateTime @updatedAt
+}
+
+model MagazineSetting {
+  id          String   @id @default(cuid())
+  magazineId  String
+  magazine    Magazine @relation(fields: [magazineId], references: [id], onDelete: Cascade)
+  key         String
+  value       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([magazineId, key])
+  @@index([magazineId])
+}
+
+model PublisherMember {
+  id          String    @id @default(cuid())
+  publisherId String
+  publisher   Publisher @relation(fields: [publisherId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        String    @default("MEMBER") // OWNER, ADMIN, EDITOR, MEMBER
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([publisherId, userId])
+  @@index([publisherId])
+  @@index([userId])
+}
+
+model PublicationMember {
+  id          String   @id @default(cuid())
+  magazineId  String
+  magazine    Magazine @relation(fields: [magazineId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        String   @default("AUTHOR") // PUBLICATION_ADMIN, EDITOR_IN_CHIEF, MANAGING_EDITOR, SECTION_EDITOR, AUTHOR, REVIEWER, PROOFREADER, TRANSLATOR, DESIGNER, CONTRIBUTOR, ANALYST
+  permissions String?  // JSON string of granular custom permissions
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([magazineId, userId])
+  @@index([magazineId])
+  @@index([userId])
+  @@index([role])
+}
+
+model PublicationSchedule {
+  id                    String    @id @default(cuid())
+  magazineId            String    @unique
+  magazine              Magazine  @relation(fields: [magazineId], references: [id], onDelete: Cascade)
+  frequency             String    @default("MONTHLY") // DAILY, WEEKLY, FORTNIGHTLY, MONTHLY, BIMONTHLY, QUARTERLY, HALFYEARLY, ANNUAL, SPECIAL_EDITION, IRREGULAR, CUSTOM
+  expectedDay           Int?
+  expectedMonth         Int?
+  nextExpectedDate      DateTime?
+  editorialDeadlineDays Int       @default(7)
+  numberingScheme       String    @default("VOL_ISSUE") // VOL_ISSUE, CONTINUOUS_ISSUE, YEAR_MONTH, HIJRI_YEAR
+  timeZone              String    @default("Asia/Dhaka")
+  autoReminders         Boolean   @default(true)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([frequency])
+  @@index([nextExpectedDate])
+}
+
+model PublicationRights {
+  id                     String            @id @default(cuid())
+  magazineId             String?
+  magazine               Magazine?         @relation(fields: [magazineId], references: [id], onDelete: Cascade)
+  issueId                String?
+  issue                  PublicationIssue? @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  rightsHolder           String
+  publisher              String?
+  licenseType            String            @default("ALL_RIGHTS_RESERVED") // ALL_RIGHTS_RESERVED, CREATIVE_COMMONS, OPEN_ACCESS, AUTHOR_PERMISSION, PUBLIC_DOMAIN
+  copyrightNotice        String?
+  allowPdfHosting        Boolean           @default(true)
+  allowArticleDisplay    Boolean           @default(true)
+  allowDownloads         Boolean           @default(true)
+  attributionRequirement String?
+  territory              String            @default("GLOBAL")
+  licenseStartDate       DateTime?
+  licenseEndDate         DateTime?
+  authorizationProofUrl  String?
+  takedownStatus         String            @default("ACTIVE") // ACTIVE, SUSPENDED, TAKEN_DOWN, UNDER_REVIEW
+  notes                  String?
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
+
+  @@index([magazineId])
+  @@index([issueId])
+  @@index([takedownStatus])
+}
+
+model PublicationAuditLog {
+  id          String     @id @default(cuid())
+  magazineId  String?
+  magazine    Magazine?  @relation(fields: [magazineId], references: [id], onDelete: Cascade)
+  publisherId String?
+  publisher   Publisher? @relation(fields: [publisherId], references: [id], onDelete: SetNull)
+  userId      String?
+  user        User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userName    String?
+  action      String     // CREATE, UPDATE, DELETE, PUBLISH, UNPUBLISH, APPROVE, REJECT, OVERRIDE, PERMISSION_CHANGE
+  targetType  String     // MAGAZINE, ISSUE, ARTICLE, FILE, MEMBER, SETTING, RIGHTS
+  targetId    String?
+  details     String?    // JSON string
+  ipHash      String?
+  createdAt   DateTime   @default(now())
+
+  @@index([magazineId])
+  @@index([publisherId])
+  @@index([userId])
+  @@index([targetType])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model PublicationSubscriptionPlan {
+  id                 String                    @id @default(cuid())
+  magazineId         String?
+  magazine           Magazine?                 @relation(fields: [magazineId], references: [id], onDelete: Cascade)
+  publisherId        String?
+  name               String
+  slug               String                    @unique
+  description        String?
+  durationMonths     Int                       @default(1) // 1 = Monthly, 3 = Quarterly, 6 = Half-Yearly, 12 = Annual
+  price              Float
+  originalPrice      Float?
+  isActive           Boolean                   @default(true)
+  isFeatured         Boolean                   @default(false)
+  features           String?                   // JSON string
+  allowDownloads     Boolean                   @default(true)
+  allowArchiveAccess Boolean                   @default(true)
+  createdAt          DateTime                  @default(now())
+  updatedAt          DateTime                  @updatedAt
+  subscriptions      PublicationSubscription[]
+
+  @@index([magazineId])
+  @@index([isActive])
+}
+
+model PublicationSubscription {
+  id            String                      @id @default(cuid())
+  userId        String
+  user          User                        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId        String
+  plan          PublicationSubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  magazineId    String?
+  magazine      Magazine?                   @relation(fields: [magazineId], references: [id], onDelete: SetNull)
+  publisherId   String?
+  status        String                      @default("ACTIVE") // ACTIVE, EXPIRED, CANCELLED, PENDING_PAYMENT, GRACE_PERIOD
+  startDate     DateTime                    @default(now())
+  endDate       DateTime
+  autoRenew     Boolean                     @default(false)
+  amountPaid    Float
+  paymentMethod String?                     // BKASH, NAGAD, SSLCOMMERZ, MANUAL
+  transactionId String?
+  createdAt     DateTime                    @default(now())
+  updatedAt     DateTime                    @updatedAt
+
+  @@index([userId])
+  @@index([planId])
+  @@index([magazineId])
+  @@index([status])
+}
+
+model ResearchPaper {
+  id            String    @id @default(cuid())
+  title         String
+  slug          String    @unique
+  abstract      String
+  content       String?
+  pdfUrl        String?
+  doi           String?
+  institution   String?
+  field         String?   // Literature, History, Philosophy, Social Science, Islamic Studies
+  authorId      String
+  author        Author    @relation(fields: [authorId], references: [id])
+  citationText  String?
+  downloads     Int       @default(0)
+  isFeatured    Boolean   @default(false)
+  publishedDate DateTime  @default(now())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Presentation {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String
+  presenter   String
+  institution String?
+  fileUrl     String
+  fileType    String   @default("PDF") // PDF, PPTX
+  slidesCount Int      @default(20)
+  isFeatured  Boolean  @default(false)
+  eventDate   DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Question {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  content     String
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+  views       Int      @default(0)
+  isClosed    Boolean  @default(false)
+  isPinned    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  answers     Answer[]
+  votes       Vote[]
+}
+
+model Answer {
+  id          String   @id @default(cuid())
+  questionId  String
+  question    Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  content     String
+  isAccepted  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  votes       Vote[]
+}
+
+model Vote {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id])
+  questionId String?
+  question   Question? @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answerId   String?
+  answer     Answer?   @relation(fields: [answerId], references: [id], onDelete: Cascade)
+  voteType   Int       // 1 for upvote, -1 for downvote
+  createdAt  DateTime  @default(now())
+
+  @@unique([userId, questionId, answerId])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  bookId    String
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  rating    Int      // 1 to 5
+  comment   String?
+  isVerified Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([bookId])
+  @@index([userId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  articleId String
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  content   String
+  isApproved Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([articleId])
+  @@index([userId])
+}
+
+model Bookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookId    String?
+  book      Book?    @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  articleId String?
+  article   Article? @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  page      Int?
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@unique([userId, bookId, articleId, page])
+}
+
+model ReadingProgress {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookId      String
+  book        Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  currentPage Int      @default(1)
+  totalPages  Int      @default(100)
+  percentage  Float    @default(0)
+  lastReadAt  DateTime @default(now())
+
+  @@unique([userId, bookId])
+}
+
+model DigitalEntitlement {
+  id        String            @id @default(cuid())
+  userId    String
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookId    String?
+  book      Book?             @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  issueId   String?
+  issue     PublicationIssue? @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  type      String            @default("PURCHASE") // PURCHASE, SUBSCRIPTION, FREE_GRANT
+  grantedAt DateTime          @default(now())
+  expiresAt DateTime?
+
+  @@unique([userId, bookId, issueId])
+}
+
+model Order {
+  id             String      @id @default(cuid())
+  orderNumber    String      @unique
+  userId         String
+  user           User        @relation(fields: [userId], references: [id])
+  subtotal       Float
+  shippingFee    Float       @default(0)
+  discount       Float       @default(0)
+  total          Float
+  paymentStatus  String      @default("PENDING") // PENDING, PAID, FAILED, REFUNDED
+  orderStatus    String      @default("PROCESSING") // PROCESSING, PACKED, SHIPPED, DELIVERED, CANCELLED
+  paymentMethod  String      // bkash, nagad, sslcommerz, cod, bank
+  transactionId  String?
+  shippingName   String
+  shippingPhone  String
+  shippingAddress String
+  shippingCity   String
+  trackingNumber String?
+  courierName    String?
+  shippedAt      DateTime?
+  deliveredAt    DateTime?
+  cancelledAt    DateTime?
+  cancelReason   String?
+  isGiftWrapped  Boolean     @default(false)
+  giftMessage    String?
+  giftWrapFee    Float       @default(0)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  items          OrderItem[]
+  subOrders      SubOrder[]
+  refunds        Refund[]
+  reservations   StockReservation[]
+  shipments      Shipment[]
+  returnRequests ReturnRequest[]
+
+  @@index([userId])
+  @@index([orderStatus])
+  @@index([paymentStatus])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id         String   @id @default(cuid())
+  orderId    String
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  bookId     String
+  book       Book     @relation(fields: [bookId], references: [id])
+  variantId  String?
+  type       String   @default("PHYSICAL") // PHYSICAL, DIGITAL
+  quantity   Int      @default(1)
+  unitPrice  Float
+  totalPrice Float
+  createdAt  DateTime @default(now())
+
+  @@index([orderId])
+  @@index([bookId])
+}
+
+model MembershipPlan {
+  id          String   @id @default(cuid())
+  name        String
+  nameEn      String
+  code        String   @unique // FREE, DIGITAL, PREMIUM, INSTITUTIONAL
+  description String
+  priceMonthly Float
+  priceYearly  Float
+  features    String   // JSON string of feature list
+  isPopular   Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id          String         @id @default(cuid())
+  userId      String
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId      String
+  plan        MembershipPlan @relation(fields: [planId], references: [id])
+  interval    String         @default("MONTHLY") // MONTHLY, YEARLY
+  status      String         @default("ACTIVE") // ACTIVE, EXPIRED, CANCELLED
+  startDate   DateTime       @default(now())
+  endDate     DateTime
+  paymentMethod String       @default("bkash")
+  transactionId String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model Submission {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  type        String   // BOOK, ARTICLE, RESEARCH, MAGAZINE
+  title       String
+  category    String
+  description String
+  fileUrl     String?
+  status      String   @default("SUBMITTED") // DRAFT, SUBMITTED, UNDER_REVIEW, REVISION_REQUESTED, APPROVED, REJECTED, PUBLISHED
+  reviewNotes String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  link      String?
+  isRead    Boolean  @default(false)
+  type      String   @default("SYSTEM") // SYSTEM, ORDER, COMMENT, QNA, SUBSCRIPTION
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+model Coupon {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  discountPct Float?
+  discountAmt Float?
+  minAmount   Float?
+  maxUsage    Int?
+  usedCount   Int       @default(0)
+  expiresAt   DateTime?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+}
+
+model SiteSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String
+  entity    String
+  entityId  String?
+  details   String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([entity])
+  @@index([createdAt])
+}
+
+// ==========================================
+// MULTI-VENDOR MARKETPLACE & COMMERCE MODELS
+// ==========================================
+
+model Vendor {
+  id                  String   @id @default(cuid())
+  name                String
+  slug                String   @unique
+  legalName           String?
+  description         String?
+  logoUrl             String?
+  bannerUrl           String?
+  email               String   @unique
+  phone               String
+  address             String
+  city                String
+  nidOrTradeLicense   String?
+  bankName            String?
+  bankAccountName     String?
+  bankAccountNumber   String?
+  bankRoutingNumber   String?
+  bkashMerchantNumber String?
+  rating              Float    @default(5.0)
+  ratingCount         Int      @default(0)
+  commissionRate      Float?   // Custom commission override if different from platform default
+  status              String   @default("APPROVED") // PENDING, APPROVED, SUSPENDED, REJECTED
+  isVerified          Boolean  @default(true)
+  isFeatured          Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  members             VendorMember[]
+  books               Book[]
+  vendorProducts      VendorProduct[]
+  subOrders           SubOrder[]
+  ledgerEntries       SellerLedgerEntry[]
+  payouts             SellerPayout[]
+}
+
+model VendorMember {
+  id        String   @id @default(cuid())
+  vendorId  String
+  vendor    Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String   @default("OWNER") // OWNER, MANAGER, STAFF
+  createdAt DateTime @default(now())
+
+  @@unique([vendorId, userId])
+}
+
+model VendorApplication {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  shopName        String
+  shopSlug        String
+  ownerName       String
+  phone           String
+  email           String
+  businessAddress String
+  city            String
+  businessType    String   // BOOKSTORE, PUBLISHER, ISLAMIC_LIFESTYLE, GENERAL
+  tradeLicense    String?
+  nidNumber       String?
+  description     String?
+  status          String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  adminNotes      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model VendorProduct {
+  id            String   @id @default(cuid())
+  vendorId      String
+  vendor        Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  bookId        String
+  book          Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  price         Float
+  discountPrice Float?
+  stockQuantity Int      @default(10)
+  condition     String   @default("NEW") // NEW, USED_LIKE_NEW, RARE
+  isDefault     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([vendorId, bookId])
+}
+
+model ProductVariant {
+  id                String    @id @default(cuid())
+  bookId            String
+  book              Book      @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  name              String    // e.g. "৬ মিলি বোতল", "১২ মিলি সুবাস", "Size: L / Color: Red"
+  sku               String?   @unique
+  barcode           String?
+  price             Float
+  salePrice         Float?
+  costPrice         Float?
+  wholesalePrice    Float?
+  stockQuantity     Int       @default(10)
+  lowStockThreshold Int       @default(5)
+  manageStock       Boolean   @default(true)
+  stockStatus       String    @default("IN_STOCK") // IN_STOCK, OUT_OF_STOCK, BACKORDER
+  allowBackorders   Boolean   @default(false)
+  image             String?
+  gallery           String?   // JSON array of image URLs
+  description       String?
+  weight            Float?    // in grams or kg
+  length            Float?
+  width             Float?
+  height            Float?
+  shippingClass     String?
+  taxClass          String?
+  status            String    @default("ACTIVE") // ACTIVE, INACTIVE
+  attributes        String?   // JSON string e.g. {"volume": "6ml", "color": "Amber"} or {"Size": "L", "Color": "Red"}
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @default(now()) @updatedAt
+
+  @@index([bookId])
+  @@index([status])
+  @@index([stockStatus])
+}
+
+model ProductAttributeGroup {
+  id           String             @id @default(cuid())
+  name         String
+  slug         String             @unique
+  description  String?
+  displayOrder Int                @default(0)
+  status       String             @default("ACTIVE") // ACTIVE, INACTIVE
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @default(now()) @updatedAt
+
+  attributes   ProductAttribute[]
+
+  @@index([status])
+  @@index([displayOrder])
+}
+
+model ProductAttribute {
+  id            String             @id @default(cuid())
+  name          String
+  slug          String             @unique
+  code          String             @unique
+  description   String?
+  type          String             @default("SELECT") // SELECT, MULTI_SELECT, RADIO, CHECKBOX, COLOR_SWATCH, IMAGE_SWATCH, TEXT, NUMBER, BUTTON
+  displayLabel  String?
+  displayOrder  Int                @default(0)
+  status        String             @default("ACTIVE") // ACTIVE, INACTIVE
+  isRequired    Boolean            @default(false)
+  isVariant     Boolean            @default(true) // Whether used for variant generation
+  showOnProduct Boolean            @default(true) // Show on product specifications
+  useInFilter   Boolean            @default(true) // Use in product filters
+  
+  groupId       String?
+  group         ProductAttributeGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull)
+
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @default(now()) @updatedAt
+
+  values        ProductAttributeValue[]
+  assignments   ProductAttributeAssignment[]
+
+  @@index([groupId])
+  @@index([type])
+  @@index([status])
+  @@index([displayOrder])
+}
+
+model ProductAttributeValue {
+  id           String             @id @default(cuid())
+  attributeId  String
+  attribute    ProductAttribute   @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  name         String
+  slug         String
+  code         String?
+  colorHex     String?            // e.g. #FF0000
+  swatchImage  String?            // Image URL for image swatch
+  displayOrder Int                @default(0)
+  status       String             @default("ACTIVE") // ACTIVE, INACTIVE
+  metadata     String?            // JSON string for extra custom metadata
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @default(now()) @updatedAt
+
+  assignmentValues ProductAttributeAssignmentValue[]
+
+  @@unique([attributeId, slug])
+  @@unique([attributeId, name])
+  @@index([attributeId])
+  @@index([status])
+  @@index([displayOrder])
+}
+
+model ProductAttributeAssignment {
+  id           String             @id @default(cuid())
+  bookId       String
+  book         Book               @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  attributeId  String
+  attribute    ProductAttribute   @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  isRequired   Boolean            @default(false)
+  isVariant    Boolean            @default(false) // Used as variant-generating on this product
+  defaultValue String?
+  displayOrder Int                @default(0)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @default(now()) @updatedAt
+
+  values       ProductAttributeAssignmentValue[]
+
+  @@unique([bookId, attributeId])
+  @@index([bookId])
+  @@index([attributeId])
+}
+
+model ProductAttributeAssignmentValue {
+  id           String                     @id @default(cuid())
+  assignmentId String
+  assignment   ProductAttributeAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  valueId      String
+  value        ProductAttributeValue      @relation(fields: [valueId], references: [id], onDelete: Cascade)
+
+  @@unique([assignmentId, valueId])
+  @@index([assignmentId])
+  @@index([valueId])
+}
+
+model SubOrder {
+  id             String      @id @default(cuid())
+  subOrderNumber String      @unique
+  orderId        String
+  order          Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  vendorId       String
+  vendor         Vendor      @relation(fields: [vendorId], references: [id])
+  subtotal       Float
+  shippingFee    Float       @default(0)
+  commissionRate Float       @default(10.0) // Commission % charged by platform
+  commissionAmt  Float       @default(0)    // Platform commission earned
+  payoutAmt      Float       @default(0)    // Net payable to seller
+  status         String      @default("PROCESSING") // PROCESSING, PACKED, SHIPPED, DELIVERED, CANCELLED
+  courierName    String?     // Pathao, RedX, Steadfast, eCourier, Paperfly
+  trackingNumber String?
+  shippedAt      DateTime?
+  deliveredAt    DateTime?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  items          SubOrderItem[]
+  shipments      Shipment[]
+  returnRequests ReturnRequest[]
+
+  @@index([orderId])
+  @@index([vendorId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model SubOrderItem {
+  id         String   @id @default(cuid())
+  subOrderId String
+  subOrder   SubOrder @relation(fields: [subOrderId], references: [id], onDelete: Cascade)
+  bookId     String
+  title      String
+  coverImage String
+  price      Float
+  quantity   Int
+  total      Float
+  createdAt  DateTime @default(now())
+
+  @@index([subOrderId])
+  @@index([bookId])
+}
+
+model CommissionRule {
+  id           String   @id @default(cuid())
+  name         String
+  categorySlug String?  @unique // if applies to specific category, null for global
+  vendorId     String?  // if applies to specific vendor
+  percentage   Float    // e.g. 10.0 for 10%
+  description  String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+}
+
+model SellerLedgerEntry {
+  id           String   @id @default(cuid())
+  vendorId     String
+  vendor       Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  subOrderId   String?
+  payoutId     String?
+  type         String   // ORDER_CREDIT, COMMISSION_DEBIT, PAYOUT_DEBIT, REFUND_ADJUSTMENT
+  amount       Float
+  balanceAfter Float
+  description  String
+  createdAt    DateTime @default(now())
+
+  @@index([vendorId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model SellerPayout {
+  id              String    @id @default(cuid())
+  payoutNumber    String    @unique
+  vendorId        String
+  vendor          Vendor    @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  amount          Float
+  method          String    // BANK_TRANSFER, BKASH_MERCHANT, NAGAD
+  accountDetails  String
+  status          String    @default("REQUESTED") // REQUESTED, APPROVED, PROCESSING, PAID, REJECTED, REVERSED
+  transactionRef  String?
+  requestedBy     String?   // Maker ID
+  approvedBy      String?   // Checker ID
+  processedBy     String?   // Disburser ID
+  requestedAt     DateTime  @default(now())
+  approvedAt      DateTime?
+  processedAt     DateTime?
+  rejectionReason String?
+  notes           String?
+
+  @@index([vendorId])
+  @@index([status])
+  @@index([requestedAt])
+}
+
+// ==========================================
+// AS-SUNNAH INSPIRED DONATION MODELS
+// ==========================================
+
+model DonationCampaign {
+  id           String   @id @default(cuid())
+  title        String
+  titleEn      String?
+  slug         String   @unique
+  category     String   // RELIEF, QURAN_DISTRIBUTION, WINTER_AID, WATER_WELL, MOSQUE, EDUCATION, GENERAL_SADAQAH
+  description  String
+  story        String?  // Rich content / full case story
+  coverImage   String
+  goalAmount   Float
+  raisedAmount Float    @default(0)
+  donorCount   Int      @default(0)
+  status       String   @default("ACTIVE") // ACTIVE, COMPLETED, PAUSED
+  startDate    DateTime @default(now())
+  endDate      DateTime?
+  isFeatured   Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  donations    Donation[]
+}
+
+model Donation {
+  id             String            @id @default(cuid())
+  donationNumber String            @unique
+  campaignId     String
+  campaign       DonationCampaign  @relation(fields: [campaignId], references: [id])
+  userId         String?
+  user           User?             @relation(fields: [userId], references: [id])
+  donorName      String
+  donorEmail     String?
+  donorPhone     String?
+  isAnonymous    Boolean           @default(false)
+  amount         Float
+  paymentMethod  String            // bkash, nagad, sslcommerz, bank
+  transactionId  String?
+  paymentStatus  String            @default("PAID") // PENDING, PAID, FAILED
+  receiptNumber  String            @unique
+  refundStatus   String?           // NONE, REFUNDED
+  refundedAt     DateTime?
+  refundReason   String?
+  notes          String?
+  createdAt      DateTime          @default(now())
+
+  receipt        DonationReceipt?
+
+  @@index([campaignId])
+  @@index([userId])
+  @@index([paymentStatus])
+  @@index([createdAt])
+}
+
+model DonationReceipt {
+  id            String   @id @default(cuid())
+  receiptNumber String   @unique
+  donationId    String   @unique
+  donation      Donation @relation(fields: [donationId], references: [id], onDelete: Cascade)
+  donorName     String
+  campaignTitle String
+  amount        Float
+  paymentMethod String
+  transactionId String?
+  issuedAt      DateTime @default(now())
+  taxExemptInfo String?  @default("শুব্বান ওয়েলফেয়ার ট্রাস্ট ও আস-সুন্নাহ সদকাহ ফান্ড স্বীকৃত")
+}
+
+// ==========================================
+// INVENTORY AUDIT & PAYMENT TRANSACTION LOGS
+// ==========================================
+
+model InventoryLog {
+  id             String   @id @default(cuid())
+  bookId         String
+  variantId      String?
+  vendorId       String?
+  changeType     String   // ORDER_FULFILLMENT, RESTOCK, RETURN, DAMAGE_WRITE_OFF, MANUAL_ADJUSTMENT
+  quantityChange Int
+  balanceAfter   Int
+  referenceId    String?  // Order/SubOrder number
+  reason         String?
+  createdAt      DateTime @default(now())
+
+  @@index([bookId])
+  @@index([createdAt])
+}
+
+model PaymentTransaction {
+  id              String   @id @default(cuid())
+  orderId         String?
+  donationId      String?
+  gateway         String   // BKASH, NAGAD, SSLCOMMERZ, COD, BANK_TRANSFER
+  amount          Float
+  currency        String   @default("BDT")
+  transactionId   String   @unique
+  status          String   @default("INITIATED") // INITIATED, SUCCESS, FAILED, CANCELLED, REFUNDED
+  gatewayResponse String?  // JSON stringified raw gateway callback
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  refunds         Refund[]
+
+  @@index([orderId])
+  @@index([donationId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model SupportTicket {
+  id           String           @id @default(cuid())
+  ticketNumber String           @unique
+  userId       String
+  user         User             @relation(fields: [userId], references: [id])
+  subject      String
+  category     String           @default("GENERAL") // ORDER, PAYMENT, RETURN, BOOK_INQUIRY, TECHNICAL, GENERAL
+  priority     String           @default("MEDIUM")  // LOW, MEDIUM, HIGH, URGENT
+  status       String           @default("OPEN")    // OPEN, IN_PROGRESS, RESOLVED, CLOSED
+  message      String
+  orderId      String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  responses    TicketResponse[]
+}
+
+model TicketResponse {
+  id        String        @id @default(cuid())
+  ticketId  String
+  ticket    SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User          @relation(fields: [userId], references: [id])
+  message   String
+  isAdmin   Boolean       @default(false)
+  createdAt DateTime      @default(now())
+}
+
+model Address {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title        String   @default("বাসার ঠিকানা") // Home, Office, Other
+  name         String
+  phone        String
+  address      String
+  city         String   @default("ঢাকা")
+  zone         String   @default("DHAKA_METRO") // DHAKA_METRO, OUTSIDE_DHAKA
+  isDefault    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([token])
+}
+
+model Refund {
+  id                   String              @id @default(cuid())
+  orderId              String
+  order                Order               @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  paymentTransactionId String?
+  paymentTransaction   PaymentTransaction? @relation(fields: [paymentTransactionId], references: [id])
+  amount               Float
+  reason               String
+  status               String              @default("PENDING") // PENDING, PROCESSED, REJECTED
+  refundTxnId          String?             @unique
+  adminNote            String?
+  processedAt          DateTime?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  returnRequests       ReturnRequest[]
+
+  @@index([orderId])
+  @@index([status])
+}
+
+model StockReservation {
+  id        String   @id @default(cuid())
+  orderId   String?
+  order     Order?   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  bookId    String
+  variantId String?
+  quantity  Int
+  status    String   @default("ACTIVE") // ACTIVE, FULFILLED, RELEASED, EXPIRED
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([bookId])
+  @@index([orderId])
+  @@index([status])
+}
+
+// ==========================================
+// SHIPPING & LOGISTICS MODELS
+// ==========================================
+
+model ShippingZone {
+  id              String           @id @default(cuid())
+  name            String           // "ঢাকা মেট্রো", "ঢাকা উপশহর", "ঢাকার বাইরে", "পার্বত্য ও প্রত্যন্ত অঞ্চল"
+  code            String           @unique // DHAKA_METRO, DHAKA_SUBURBS, OUTSIDE_DHAKA, REMOTE
+  rate            Float            // Base delivery fee (e.g. 60, 90, 120, 150)
+  estimatedDays   String           // "১-২ দিন", "২-৩ দিন", "৩-৫ দিন"
+  freeDeliveryMin Float?           // Minimum cart total for free delivery, e.g. 1000
+  isActive        Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  methods         ShippingMethod[]
+  rates           ShippingRate[]
+}
+
+model ShippingMethod {
+  id             String       @id @default(cuid())
+  zoneId         String
+  zone           ShippingZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  name           String       // "স্ট্যান্ডার্ড হোম ডেলিভারি", "এক্সপ্রেস ২৪ ঘণ্টা"
+  code           String       // STANDARD, EXPRESS, SAME_DAY
+  baseCharge     Float
+  perKgExtra     Float        @default(20.0)
+  courierPartner String       // Pathao, Steadfast, RedX, eCourier, Paperfly
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+}
+
+model CourierProvider {
+  id                        String              @id @default(cuid())
+  code                      String              @unique // PATHAO, STEADFAST, REDX
+  name                      String              // "Pathao Courier", "Steadfast Courier", "REDX Delivery"
+  logoUrl                   String?
+  isEnabled                 Boolean             @default(false)
+  isDefault                 Boolean             @default(false)
+  status                    String              @default("PENDING_CONFIG") // ACTIVE, PENDING_CONFIG, ERROR, DISABLED
+  apiBaseUrl                String
+  webhookUrl                String?
+  apiKey                    String?
+  apiSecret                 String?
+  clientId                  String?
+  clientSecret              String?
+  username                  String?
+  password                  String?
+  storeId                   String?
+  isCodSupported            Boolean             @default(true)
+  autoBookingEnabled        Boolean             @default(false)
+  defaultChargeInsideDhaka  Float               @default(60.0)
+  defaultChargeOutsideDhaka Float               @default(120.0)
+  createdAt                 DateTime            @default(now())
+  updatedAt                 DateTime            @updatedAt
+
+  shipments                 Shipment[]
+  webhookLogs               CourierWebhookLog[]
+  settings                  CourierSetting[]
+}
+
+model CourierSetting {
+  id          String          @id @default(cuid())
+  providerId  String
+  provider    CourierProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  key         String
+  value       String
+  isEncrypted Boolean         @default(false)
+
+  @@unique([providerId, key])
+}
+
+model ShippingRate {
+  id                 String        @id @default(cuid())
+  zoneId             String?
+  zone               ShippingZone? @relation(fields: [zoneId], references: [id])
+  providerCode       String?       // PATHAO, STEADFAST, REDX or ALL
+  name               String
+  destinationType    String        // INSIDE_DHAKA, SUB_DHAKA, OUTSIDE_DHAKA, DISTRICT, UPAZILA
+  district           String?
+  upazila            String?
+  baseWeightKg       Float         @default(1.0)
+  baseRate           Float         @default(60.0)
+  perKgExtraRate     Float         @default(20.0)
+  codChargePct       Float         @default(1.0) // percentage, e.g. 1.0%
+  codChargeFixed     Float         @default(0.0)
+  specialDeliveryFee Float         @default(0.0)
+  isActive           Boolean       @default(true)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  @@index([destinationType])
+  @@index([district])
+}
+
+model Shipment {
+  id              String             @id @default(cuid())
+  shipmentNumber  String             @unique // e.g. "SHP-2026-XXXXX"
+  orderId         String
+  order           Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  subOrderId      String?
+  subOrder        SubOrder?          @relation(fields: [subOrderId], references: [id])
+  providerId      String?
+  provider        CourierProvider?   @relation(fields: [providerId], references: [id])
+  settlementId    String?
+  settlement      CodSettlement?     @relation(fields: [settlementId], references: [id])
+  courierCode     String             // PATHAO, STEADFAST, REDX, ECOURIER, PAPERFLY
+  courierName     String             // "Pathao Courier", "Steadfast Courier"
+  trackingNumber  String?            // Courier tracking number or Consignment ID
+  consignmentId   String?
+  status          String             @default("PENDING_PICKUP") // PENDING_PICKUP, PICKED_UP, IN_TRANSIT, OUT_FOR_DELIVERY, DELIVERED, RETURNED, FAILED, CANCELLED
+  shippingAddress String
+  shippingPhone   String
+  recipientName   String
+  weightKg        Float              @default(1.0)
+  codAmount       Float              @default(0) // COD amount to collect from customer
+  codCollected    Float              @default(0) // Actual amount collected
+  courierFee      Float              @default(0) // Delivery fee charged by courier
+  netRemittance   Float              @default(0) // codCollected - courierFee remitted to platform
+  isRemitted      Boolean            @default(false) // Whether courier settled COD remittance
+  remittedAt      DateTime?
+  shippedAt       DateTime?
+  deliveredAt     DateTime?
+  labelPrintedAt  DateTime?
+  invoicePrintedAt DateTime?
+  deliveryTimeline String?           // JSON array string of checkpoints
+  failedReason    String?
+  notes           String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  events          ShipmentEvent[]
+  webhookLogs     CourierWebhookLog[]
+
+  @@index([orderId])
+  @@index([status])
+  @@index([trackingNumber])
+  @@index([consignmentId])
+}
+
+model ShipmentEvent {
+  id            String   @id @default(cuid())
+  shipmentId    String
+  shipment      Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  status        String
+  courierStatus String?
+  location      String?
+  note          String?
+  timestamp     DateTime @default(now())
+
+  @@index([shipmentId])
+}
+
+model CourierWebhookLog {
+  id              String           @id @default(cuid())
+  providerCode    String
+  providerId      String?
+  provider        CourierProvider? @relation(fields: [providerId], references: [id])
+  event           String
+  consignmentId   String?
+  trackingNumber  String?
+  shipmentId      String?
+  shipment        Shipment?        @relation(fields: [shipmentId], references: [id])
+  payload         String           // JSON string of webhook body
+  signature       String?
+  isVerified      Boolean          @default(false)
+  processedStatus String           @default("PENDING") // PROCESSED, FAILED, IGNORED, DUPLICATE
+  errorMessage    String?
+  createdAt       DateTime         @default(now())
+
+  @@index([providerCode, event])
+  @@index([consignmentId])
+  @@index([trackingNumber])
+}
+
+model CodSettlement {
+  id                  String     @id @default(cuid())
+  settlementNumber    String     @unique // e.g. "COD-SETTLE-2026-XXXXX"
+  courierCode         String
+  totalCodCollected   Float
+  totalCourierCharges Float
+  totalCodFees        Float      @default(0.0)
+  netSettlementAmount Float
+  receivedAmount      Float      @default(0)
+  status              String     @default("PENDING") // PENDING, PARTIALLY_PAID, SETTLED, DISCREPANCY
+  bankAccount         String?
+  bankTxnReference    String?
+  settledAt           DateTime?
+  reconciledBy        String?
+  notes               String?
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  shipments           Shipment[]
+
+  @@index([courierCode])
+  @@index([status])
+}
+
+model ReturnShipment {
+  id              String        @id @default(cuid())
+  returnRequestId String        @unique
+  returnRequest   ReturnRequest @relation(fields: [returnRequestId], references: [id], onDelete: Cascade)
+  courierCode     String
+  trackingNumber  String?
+  consignmentId   String?
+  pickupAddress   String
+  status          String        @default("BOOKED") // BOOKED, PICKED_UP, IN_TRANSIT, RECEIVED_AT_HUB, INSPECTED, COMPLETED
+  shippingFee     Float         @default(0)
+  feeBorneBy      String        @default("PLATFORM") // CUSTOMER, PLATFORM, VENDOR
+  shippedAt       DateTime?
+  receivedAt      DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+// ==========================================
+// RETURNS, DISPUTES & RESTOCKING MODELS
+// ==========================================
+
+model ReturnRequest {
+  id               String         @id @default(cuid())
+  returnNumber     String         @unique // e.g. "RTN-2026-XXXXX"
+  orderId          String
+  order            Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  subOrderId       String?
+  subOrder         SubOrder?      @relation(fields: [subOrderId], references: [id])
+  userId           String
+  user             User           @relation(fields: [userId], references: [id])
+  status           String         @default("REQUESTED") // REQUESTED, APPROVED, REJECTED, ITEM_RECEIVED, INSPECTED, REFUNDED, DISPUTED, CLOSED
+  reason           String         // DEFECTIVE_PRINTING, WRONG_ITEM, DAMAGED_IN_TRANSIT, CHANGED_MIND, MISSING_PAGES
+  explanation      String?
+  customerImages   String?        // JSON array of image URLs
+  approvedBy       String?        // Admin / Manager who approved
+  approvedAt       DateTime?
+  inspectionNotes  String?
+  inspectionResult String?        // RESELLABLE, DAMAGED, REJECTED
+  restocked        Boolean        @default(false)
+  refundAmount     Float          @default(0)
+  refundStatus     String         @default("PENDING") // PENDING, PROCESSED, REJECTED
+  refundTxnId      String?
+  refundId         String?
+  refund           Refund?        @relation(fields: [refundId], references: [id])
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  items            ReturnItem[]
+  disputes         ReturnDispute[]
+  returnShipment   ReturnShipment?
+}
+
+model ReturnItem {
+  id              String        @id @default(cuid())
+  returnRequestId String
+  returnRequest   ReturnRequest @relation(fields: [returnRequestId], references: [id], onDelete: Cascade)
+  bookId          String
+  book            Book          @relation(fields: [bookId], references: [id])
+  variantId       String?
+  quantity        Int           @default(1)
+  unitPrice       Float
+  totalPrice      Float
+  condition       String?       // INTACT, DAMAGED, DEFECTIVE
+  restocked       Boolean       @default(false)
+}
+
+model ReturnDispute {
+  id              String        @id @default(cuid())
+  disputeNumber   String        @unique // e.g. "DSP-2026-XXXXX"
+  returnRequestId String
+  returnRequest   ReturnRequest @relation(fields: [returnRequestId], references: [id], onDelete: Cascade)
+  raisedByRole    String        // VENDOR, CUSTOMER, ADMIN
+  raisedByUserId  String
+  reason          String
+  status          String        @default("OPEN") // OPEN, UNDER_REVIEW, RESOLVED_CUSTOMER_FAVOR, RESOLVED_VENDOR_FAVOR, REJECTED
+  resolutionNotes String?
+  resolvedBy      String?
+  resolvedAt      DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+// ==========================================
+// ISLAMIC RESOURCES & EDUCATIONAL COLLECTIONS
+// ==========================================
+
+model IslamicResource {
+  id           String   @id @default(cuid())
+  title        String
+  titleEn      String?
+  slug         String   @unique
+  topic        String   // AQEEDAH, FIQH, TAFSEER, HADITH, SEERAH, ARABIC_LANGUAGE, TAJWEED, CONTEMPORARY
+  category     String   // EBOOK, AUDIO_LECTURE, INFOGRAPHIC, RESEARCH_PAPER, WORKSHEET, CURRICULUM
+  description  String
+  fileUrl      String?
+  fileType     String?  // PDF, MP3, PNG, ZIP
+  fileSize     String?
+  authorName   String?
+  publisher    String?
+  language     String   @default("bn") // bn, ar, en
+  downloads    Int      @default(0)
+  isFeatured   Boolean  @default(false)
+  isFree       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([topic])
+  @@index([category])
+  @@index([isFeatured])
+  @@index([createdAt])
+}
+
+// ==========================================
+// SEPARATE DONATION FINANCIAL LEDGER
+// ==========================================
+
+model DonationLedgerEntry {
+  id              String   @id @default(cuid())
+  campaignId      String
+  donationId      String?
+  type            String   // DONATION_CREDIT, RELIEF_DISBURSEMENT_DEBIT, REFUND_DEBIT, BANK_FEE_DEBIT
+  amount          Float
+  balanceAfter    Float
+  referenceNumber String?
+  description     String
+  recordedBy      String?  // Admin / Audit user ID
+  createdAt       DateTime @default(now())
+
+  @@index([campaignId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+// ==========================================
+// HOMEPAGE BUILDER & HERO SLIDER
+// ==========================================
+
+model HeroSlide {
+  id             String    @id @default(cuid())
+  badge          String
+  badgeIcon      String    @default("Flame") // Flame, Sparkles, BookOpen, Gift, HeartHandshake, Store
+  headline       String
+  subhead        String
+  couponCode     String?
+  primaryCtaText String    @default("সকল বই দেখুন")
+  primaryCtaLink String    @default("/books")
+  secondaryCtaText String?
+  secondaryCtaLink String?
+  bgGradient     String    @default("from-shubban-green via-emerald-950 to-shubban-green")
+  imageUrl       String
+  displayOrder   Int       @default(0)
+  isPublished    Boolean   @default(true)
+  startDate      DateTime?
+  endDate        DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([isPublished, displayOrder])
+}
+
+model HomepageSection {
+  id           String    @id @default(cuid())
+  sectionKey   String    @unique // slider, categories, flash_sale, featured_books, digital_library, new_bestsellers, islamic_books, lifestyle, donations, magazines, articles, research_qa, vendors, authors, publishers, membership, newsletter, custom
+  title        String
+  subtitle     String?
+  isEnabled    Boolean   @default(true)
+  displayOrder Int       @default(0)
+  badge        String?
+  viewAllUrl   String?
+  config       String?   // JSON metadata (item limits, layout style, category IDs, custom content)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([isEnabled, displayOrder])
+}
+
+// ==========================================
+// NAVIGATION MENUS & FOOTER CMS
+// ==========================================
+
+model NavigationMenuItem {
+  id           String               @id @default(cuid())
+  label        String
+  url          String
+  icon         String?
+  target       String               @default("_self")
+  displayOrder Int                  @default(0)
+  isEnabled    Boolean              @default(true)
+  isMegaMenu   Boolean              @default(false)
+  badgeText    String?
+  parentId     String?
+  parent       NavigationMenuItem?  @relation("MenuHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children     NavigationMenuItem[] @relation("MenuHierarchy")
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  @@index([isEnabled, displayOrder])
+}
+
+model FooterColumn {
+  id           String       @id @default(cuid())
+  title        String
+  displayOrder Int          @default(0)
+  links        FooterLink[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model FooterLink {
+  id           String       @id @default(cuid())
+  label        String
+  url          String
+  displayOrder Int          @default(0)
+  isExternal   Boolean      @default(false)
+  columnId     String
+  column       FooterColumn @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([columnId, displayOrder])
+}
+
+// ==========================================
+// CUSTOM PAGES & POLICY BUILDER
+// ==========================================
+
+model CustomPage {
+  id              String    @id @default(cuid())
+  slug            String    @unique
+  title           String
+  subtitle        String?
+  content         String
+  metaTitle       String?
+  metaDescription String?
+  template        String    @default("STANDARD") // STANDARD, FULL_WIDTH, LEGAL, LANDING
+  isPublished     Boolean   @default(true)
+  publishedAt     DateTime? @default(now())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([slug, isPublished])
+}
+
+// ==========================================
+// AI AUTONOMOUS MANAGEMENT SYSTEM
+// ==========================================
+
+model AiConversation {
+  id           String      @id @default(cuid())
+  userId       String
+  title        String
+  agentKey     String?     @default("general-ai")
+  mode         String?     @default("AUTO") // AUTO, MANUAL
+  magazineId   String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  messages     AiMessage[]
+  tasks        AiTask[]
+
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, updatedAt])
+  @@index([agentKey])
+}
+
+model AiMessage {
+  id             String          @id @default(cuid())
+  conversationId String
+  sender         String          // USER, AI, SYSTEM
+  agentKey       String?         // Which agent produced this response
+  content        String
+  evidenceStatus String?         // VERIFIED, PARTIALLY_VERIFIED, INSUFFICIENT_EVIDENCE
+  citations      String?         // JSON string of source citations
+  tokensUsed     Int             @default(0)
+  createdAt      DateTime        @default(now())
+
+  conversation   AiConversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  task           AiTask?
+
+  @@index([conversationId, createdAt])
+}
+
+model AiTask {
+  id             String            @id @default(cuid())
+  conversationId String
+  messageId      String?           @unique
+  command        String
+  intent         String            // HOMEPAGE_UPDATE, BANNER_CREATE, SEO_OPTIMIZE, PRODUCT_ANALYSIS, CAMPAIGN_LAUNCH, APPEARANCE_CHANGE, etc.
+  status         String            @default("PLANNED") // PLANNED, PENDING_APPROVAL, EXECUTING, COMPLETED, REJECTED, FAILED, ROLLED_BACK
+  safetyMode     String            @default("MODE_B") // MODE_A, MODE_B, MODE_C
+  planSummary    String
+  beforeState    String?           // JSON snapshot before execution
+  afterState     String?           // JSON snapshot after execution
+  diffPreview    String?           // JSON comparison for UI diff
+  rollbackData   String?           // JSON instructions to revert state
+  errorDetails   String?
+  executedAt     DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  conversation   AiConversation    @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  message        AiMessage?        @relation(fields: [messageId], references: [id])
+  steps          AiTaskStep[]
+  toolExecutions AiToolExecution[]
+  approval       AiApproval?
+
+  @@index([status, safetyMode])
+}
+
+model AiTaskStep {
+  id           String    @id @default(cuid())
+  taskId       String
+  stepOrder    Int
+  title        String
+  toolName     String
+  status       String    @default("PENDING") // PENDING, RUNNING, COMPLETED, FAILED
+  result       String?   // JSON output
+  task         AiTask    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId, stepOrder])
+}
+
+model AiApproval {
+  id           String    @id @default(cuid())
+  taskId       String    @unique
+  requestedBy  String
+  approvedBy   String?
+  decision     String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  comment      String?
+  decidedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  task         AiTask    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+}
+
+model AiToolExecution {
+  id           String    @id @default(cuid())
+  taskId       String
+  toolName     String
+  inputParams  String    // JSON
+  outputData   String?   // JSON
+  isSuccess    Boolean   @default(true)
+  durationMs   Int       @default(0)
+  createdAt    DateTime  @default(now())
+  task         AiTask    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([toolName, createdAt])
+}
+
+model AiUsageLog {
+  id           String    @id @default(cuid())
+  userId       String
+  provider     String    @default("INTERNAL_ORCHESTRATOR") // GEMINI, OPENAI, INTERNAL_ORCHESTRATOR
+  model        String    @default("gemini-2.0-flash")
+  promptTokens Int       @default(0)
+  compTokens   Int       @default(0)
+  totalCostUsd Float     @default(0.0)
+  actionType   String
+  createdAt    DateTime  @default(now())
+
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+}
+
+model AiProviderSetting {
+  id           String    @id @default(cuid())
+  providerKey  String    @unique // gemini, openai, local
+  name         String
+  isEnabled    Boolean   @default(false)
+  apiKeyEnc    String?   // Encrypted server-side
+  modelName    String    @default("gemini-2.0-flash")
+  temperature  Float     @default(0.7)
+  maxTokens    Int       @default(2048)
+  updatedAt    DateTime  @updatedAt
+}
+
+// ==========================================
+// ADVANCED ISLAMIC AI KNOWLEDGE MODELS
+// ==========================================
+
+model QuranVerse {
+  id              String             @id @default(cuid())
+  surahNumber     Int
+  surahNameAr     String             // e.g. "الفاتحة"
+  surahNameEn     String             // e.g. "Al-Fatihah"
+  surahNameBn     String             // e.g. "সূরা আল-ফাতিহা"
+  ayahNumber      Int
+  textAr          String             // Full Uthmani Arabic text with Tashkeel
+  textNormalized  String             // Normalized Arabic without diacritics for search
+  juzNumber       Int                @default(1)
+  revelationType  String             @default("MECCAN") // MECCAN, MEDINAN
+  translations    QuranTranslation[]
+  tafsirEntries   TafsirEntry[]
+
+  @@unique([surahNumber, ayahNumber])
+  @@index([surahNumber])
+  @@index([textNormalized])
+}
+
+model QuranTranslation {
+  id           String     @id @default(cuid())
+  verseId      String
+  verse        QuranVerse @relation(fields: [verseId], references: [id], onDelete: Cascade)
+  language     String     // "bn", "en"
+  translator   String     // "মুহিউদ্দীন খান", "বায়ান ফাউন্ডেশন", "Sahih International"
+  translation  String     // Translated text
+  sourceName   String     // e.g. "তাজ কোম্পানী কুরআন শরীফ", "King Fahd Quran Complex"
+
+  @@index([verseId, language])
+}
+
+model TafsirEntry {
+  id           String     @id @default(cuid())
+  verseId      String
+  verse        QuranVerse @relation(fields: [verseId], references: [id], onDelete: Cascade)
+  sourceName   String     // e.g. "তাফসীরে ইবনে কাসীর", "তাফসীরে জালালাইন", "মাআরিফুল কুরআন"
+  author       String     // e.g. "আল্লামা ইবনে কাসীর (রহ.)", "মুফতী মুহাম্মদ শফী (রহ.)"
+  volume       Int?
+  page         Int?
+  content      String     // Rich commentary excerpt
+  language     String     @default("bn") // bn, en, ar
+
+  @@index([verseId, sourceName])
+}
+
+model HadithCollection {
+  id           String        @id @default(cuid())
+  slug         String        @unique // "bukhari", "muslim", "abu-dawud", "tirmidhi", "nasai", "ibn-majah"
+  nameAr       String        // e.g. "صحيح البخاري"
+  nameEn       String        // e.g. "Sahih al-Bukhari"
+  nameBn       String        // e.g. "সহীহুল বুখারী"
+  compiler     String        // e.g. "ইমাম বুখারী (রহ.)"
+  totalHadith  Int           @default(7563)
+  isCanonical  Boolean       @default(true)
+  entries      HadithEntry[]
+}
+
+model HadithEntry {
+  id               String           @id @default(cuid())
+  collectionId     String
+  collection       HadithCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  hadithNumber     Int
+  chapterNameBn    String?          // e.g. "কিতাবুল ঈমান (বিশ্বাসের অধ্যায়)"
+  chapterNameAr    String?
+  chapterNameEn    String?
+  narrator         String?          // e.g. "হযরত আবু হুরায়রা (রা.)"
+  textAr           String           // Arabic matn with Tashkeel
+  textBn           String           // Verified Bengali translation
+  textEn           String?          // Verified English translation
+  authenticity     String           // "SAHIH", "HASAN", "DAIF", "MUTAWATIR"
+  gradingAuthority String           // e.g. "ইমাম বুখারী", "আল্লামা আলবানী", "শায়খ শুআইব আল-আরনাউত"
+  topicTag         String           // e.g. "SALAH", "ZAKAH", "SAWM", "TAWHID", "CHARACTER", "PURITY"
+  sourceUrl        String?
+
+  @@index([collectionId, hadithNumber])
+  @@index([topicTag])
+  @@index([authenticity])
+}
+
+model ScholarlyReference {
+  id                 String   @id @default(cuid())
+  topic              String   // e.g. "রুকুতে হাত তোলা (রাফউল ইয়াদাইন)", "তারাভীহর রাকাত সংখ্যা"
+  topicEn            String?
+  madhhabViewHanafi  String?  // Hanafi perspective with dalil
+  madhhabViewMaliki  String?  // Maliki perspective with dalil
+  madhhabViewShafii  String?  // Shafi'i perspective with dalil
+  madhhabViewHanbali String?  // Hanbali perspective with dalil
+  consensusNotes     String?  // Scholarly consensus (Ijma) or difference (Ikhtilaf) reasons
+  classicalSources   String?  // e.g. "আল-মাবসূত (সারাখসী), আল-মুগনী (ইবনে কুদামা)"
+  createdAt          DateTime @default(now())
+
+  @@index([topic])
+}
+
+model IslamicAiConversation {
+  id           String             @id @default(cuid())
+  userId       String?
+  sessionId    String?            // Guest session support
+  title        String
+  language     String             @default("bn") // bn, en, ar
+  mode         String             @default("STANDARD") // STANDARD, RESEARCH
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  messages     IslamicAiMessage[]
+
+  @@index([userId, updatedAt])
+  @@index([sessionId])
+}
+
+model IslamicAiMessage {
+  id                 String                @id @default(cuid())
+  conversationId     String
+  conversation       IslamicAiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender             String                // "USER", "AI"
+  content            String
+  evidenceStatus     String                @default("VERIFIED") // VERIFIED, PARTIALLY_VERIFIED, INSUFFICIENT_EVIDENCE
+  mode               String                @default("STANDARD")
+  citations          IslamicAiCitation[]
+  feedback           IslamicAiFeedback[]
+  recommendedBookIds String?               // JSON array of Book IDs
+  createdAt          DateTime              @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
+model IslamicAiCitation {
+  id           String           @id @default(cuid())
+  messageId    String
+  message      IslamicAiMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  sourceType   String           // "QURAN", "HADITH", "TAFSIR", "SCHOLARLY"
+  referenceId  String           // e.g. "Bukhari:1", "Quran:2:255"
+  title        String
+  arabicText   String?
+  translation  String
+  grading      String?
+  sourceBook   String
+  url          String?
+  createdAt    DateTime         @default(now())
+
+  @@index([messageId])
+}
+
+model IslamicAiFeedback {
+  id            String           @id @default(cuid())
+  messageId     String
+  message       IslamicAiMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId        String?
+  isHelpful     Boolean
+  reportedError Boolean          @default(false)
+  comment       String?
+  createdAt     DateTime         @default(now())
+
+  @@index([messageId])
+}
+
+model PushSubscription {
+  id                 String    @id @default(cuid())
+  userId             String?
+  user               User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applicationType    String    @default("MAIN") // MAIN, ADMIN
+  endpoint           String    @unique
+  p256dh             String
+  auth               String
+  userAgent          String?
+  subscriptionStatus String    @default("ACTIVE") // ACTIVE, EXPIRED, UNSUBSCRIBED
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  lastUsedAt         DateTime?
+
+  @@index([userId])
+  @@index([applicationType])
+  @@index([subscriptionStatus])
+}
+
+model PushNotificationPreference {
+  id                   String   @id @default(cuid())
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applicationType      String   @default("MAIN") // MAIN, ADMIN
+  notificationCategory String   // ORDERS, PROMOTIONS, SYSTEM, SECURITY, INVENTORY, SHIPMENT
+  enabled              Boolean  @default(true)
+  updatedAt            DateTime @updatedAt
+
+  @@unique([userId, applicationType, notificationCategory])
+  @@index([userId])
+}
+
+model PushNotificationLog {
+  id                   String    @id @default(cuid())
+  recipientId          String?
+  recipient            User?     @relation(fields: [recipientId], references: [id], onDelete: SetNull)
+  applicationType      String    @default("MAIN") // MAIN, ADMIN
+  notificationCategory String
+  title                String
+  body                 String
+  deliveryStatus       String    @default("SENT") // SENT, FAILED, RETRYING
+  providerResponse     String?
+  retryCount           Int       @default(0)
+  createdAt            DateTime  @default(now())
+  sentAt               DateTime?
+
+  @@index([applicationType])
+  @@index([deliveryStatus])
+  @@index([createdAt])
+  @@index([recipientId])
+}
+
+// ==========================================
+// SHUBBAN AI STUDIO MODELS
+// ==========================================
+
+model AiAgent {
+  id             String   @id @default(cuid())
+  key            String   @unique // general-ai, islamic-ai, research-ai, magazine-ai, marketplace-ai, website-ai, support-ai, seo-ai, business-ai, design-ai, video-ai, knowledge-ai
+  name           String
+  nameEn         String
+  description    String
+  department     String   // GENERAL, ISLAMIC, EDITORIAL, COMMERCE, OPERATIONS, MARKETING, ANALYTICS, CREATIVE
+  icon           String   @default("Bot")
+  enabled        Boolean  @default(true)
+  providerId     String?
+  modelName      String?
+  systemPrompt   String
+  knowledgeScope String?  // ALL, QURAN_HADITH, MARKETPLACE, MAGAZINE, OPERATIONS, INTERNAL
+  allowedTools   String?  // JSON string array of tool names
+  permissions    String?  // JSON string
+  safetyMode     String   @default("MODE_A") // MODE_A, MODE_B, MODE_C
+  isPublic       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model AiProviderConfig {
+  id              String   @id @default(cuid())
+  providerKey     String   @unique // OPENAI, GEMINI, ANTHROPIC, OLLAMA, LOCAL_RAG
+  name            String
+  apiKey          String?
+  apiEndpoint     String?
+  isDefault       Boolean  @default(false)
+  isActive        Boolean  @default(true)
+  modelsSupported String?  // JSON string array
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model AiKnowledgeSource {
+  id             String    @id @default(cuid())
+  title          String
+  sourceType     String    // QURAN, HADITH, TAFSIR, ARTICLE, MAGAZINE, BOOK, DOCUMENT, POLICY, URL
+  description    String?
+  tenantScope    String?   // GLOBAL or magazineId
+  isPublic       Boolean   @default(true)
+  status         String    @default("ACTIVE") // ACTIVE, INDEXING, ERROR, DISABLED
+  documentCount  Int       @default(0)
+  chunkCount     Int       @default(0)
+  lastIndexedAt  DateTime?
+  metadata       String?   // JSON string
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model AiAutomationWorkflow {
+  id             String    @id @default(cuid())
+  name           String
+  description    String?
+  triggerType    String    @default("MANUAL") // SCHEDULE, EVENT, MANUAL
+  cronExpression String?   // e.g. "0 9 * * *"
+  eventName      String?   // e.g. "ORDER_CREATED", "ISSUE_PUBLISHED"
+  agentKey       String    @default("general-ai")
+  actionType     String    // REPORT, AUDIT, REMINDER, DRAFT_GENERATE, SYNC
+  parameters     String?   // JSON string
+  status         String    @default("ACTIVE") // ACTIVE, PAUSED, ERROR
+  isEnabled      Boolean   @default(true)
+  lastRunAt      DateTime?
+  nextRunAt      DateTime?
+  lastRunStatus  String?   // SUCCESS, FAILED
+  executionCount Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+// ========================================================
+// ADMINISTRATIVE STAFF & HRMS RESPONSIBILITY MODULE
+// ========================================================
+
+model Department {
+  id          String         @id @default(cuid())
+  name        String
+  nameEn      String?
+  slug        String         @unique
+  code        String         @unique
+  description String?
+  headId      String?
+  head        User?          @relation("DepartmentHead", fields: [headId], references: [id], onDelete: SetNull)
+  status      String         @default("ACTIVE") // ACTIVE, INACTIVE
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  designations Designation[]
+  staffMembers StaffProfile[]
+  tasks        StaffTask[]
+
+  @@index([status])
+}
+
+model Designation {
+  id           String         @id @default(cuid())
+  name         String
+  nameEn       String?
+  departmentId String
+  department   Department     @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  level        Int            @default(1) // 1 (Junior) to 10 (Director/C-level)
+  description  String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  staffMembers StaffProfile[]
+
+  @@index([departmentId])
+}
+
+model StaffProfile {
+  id                  String               @id @default(cuid())
+  userId              String               @unique
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  employeeId          String               @unique // e.g. "SL-EMP-001"
+  departmentId        String?
+  department          Department?          @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  designationId       String?
+  designation         Designation?         @relation(fields: [designationId], references: [id], onDelete: SetNull)
+  supervisorId        String?
+  supervisor          StaffProfile?        @relation("StaffSupervision", fields: [supervisorId], references: [id], onDelete: SetNull)
+  subordinates        StaffProfile[]       @relation("StaffSupervision")
+  
+  employmentType      String               @default("FULL_TIME") // FULL_TIME, PART_TIME, CONTRACT, INTERN, VOLUNTEER
+  employmentStatus    String               @default("ACTIVE") // ACTIVE, ON_LEAVE, PROBATION, SUSPENDED, TERMINATED, RESIGNED
+  joiningDate         DateTime             @default(now())
+  workResponsibilities String?
+  emergencyContact    String?              // JSON string e.g. { name: "", relation: "", phone: "" }
+  professionalBio     String?
+  internalNotes       String?              // Admin-only confidential notes
+  salaryGrade         String?              // Grade A, Grade B, etc.
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  attendances         StaffAttendance[]
+  leaveRequests       StaffLeaveRequest[]
+
+  @@index([departmentId])
+  @@index([designationId])
+  @@index([employmentStatus])
+  @@index([employeeId])
+}
+
+model StaffTask {
+  id            String             @id @default(cuid())
+  title         String
+  description   String?
+  departmentId  String?
+  department    Department?        @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  creatorId     String
+  creator       User               @relation("TaskCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  assigneeId    String?
+  assignee      User?              @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  priority      String             @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
+  status        String             @default("TODO") // TODO, IN_PROGRESS, REVIEW, COMPLETED, CANCELLED
+  progress      Int                @default(0) // 0 to 100 percentage
+  startDate     DateTime?
+  dueDate       DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  comments      StaffTaskComment[]
+
+  @@index([departmentId])
+  @@index([creatorId])
+  @@index([assigneeId])
+  @@index([status])
+  @@index([priority])
+}
+
+model StaffTaskComment {
+  id            String    @id @default(cuid())
+  taskId        String
+  task          StaffTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  authorId      String
+  author        User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  content       String
+  attachmentUrl String?
+  createdAt     DateTime  @default(now())
+
+  @@index([taskId])
+  @@index([authorId])
+}
+
+model StaffApproval {
+  id            String    @id @default(cuid())
+  title         String
+  type          String    // CONTENT_PUBLISH, EXPENSE, LEAVE, PRODUCT_APPROVAL, GENERAL
+  requestedById String
+  requestedBy   User      @relation("ApprovalRequester", fields: [requestedById], references: [id], onDelete: Cascade)
+  reviewerId    String?
+  reviewer      User?     @relation("ApprovalReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+  status        String    @default("PENDING") // PENDING, APPROVED, REJECTED, CANCELLED
+  details       String?   // JSON or text description
+  remarks       String?   // Reviewer notes
+  decisionAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([status])
+  @@index([type])
+  @@index([requestedById])
+  @@index([reviewerId])
+}
+
+model StaffAttendance {
+  id             String       @id @default(cuid())
+  staffProfileId String
+  staffProfile   StaffProfile @relation(fields: [staffProfileId], references: [id], onDelete: Cascade)
+  date           DateTime     @default(now())
+  checkInTime    DateTime?
+  checkOutTime   DateTime?
+  status         String       @default("PRESENT") // PRESENT, LATE, HALF_DAY, ABSENT, ON_LEAVE
+  remarks        String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([staffProfileId])
+  @@index([date])
+  @@index([status])
+}
+
+model StaffLeaveRequest {
+  id              String       @id @default(cuid())
+  staffProfileId  String
+  staffProfile    StaffProfile @relation(fields: [staffProfileId], references: [id], onDelete: Cascade)
+  leaveType       String       @default("CASUAL") // CASUAL, SICK, ANNUAL, MATERNITY, UNPAID, OTHER
+  startDate       DateTime
+  endDate         DateTime
+  daysCount       Int          @default(1)
+  reason          String
+  status          String       @default("PENDING") // PENDING, APPROVED, REJECTED, CANCELLED
+  approvedById    String?
+  approvedBy      User?        @relation("LeaveApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+  decisionRemarks String?
+  decisionAt      DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([staffProfileId])
+  @@index([status])
+  @@index([leaveType])
+}
+
+// ==========================================
+// SHUBBAN ADS NETWORK MODELS
+// ==========================================
+
+model Advertiser {
+  id                 String             @id @default(cuid())
+  name               String             // Contact person / Display name
+  companyName        String             // Business / Organization name
+  slug               String             @unique
+  logoUrl            String?
+  website            String?
+  email              String
+  phone              String?
+  address            String?
+  city               String?
+  country            String?            @default("Bangladesh")
+  taxId              String?            // BIN, TIN or Trade License Number
+  verificationDocUrl String?
+  status             String             @default("PENDING") // PENDING, ACTIVE, SUSPENDED, REJECTED
+  verifiedAt         DateTime?
+  rejectionReason    String?
+  internalNotes      String?            // Admin-only confidential notes
+  ownerId            String
+  owner              User               @relation("AdvertiserOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  members            AdvertiserMember[]
+  campaigns          AdCampaign[]
+  creatives          AdCreative[]
+  invoices           AdInvoice[]
+  payments           AdPayment[]
+  refunds            AdRefund[]
+  staffAssignments   AdStaffAssignment[]
+
+  @@index([status])
+  @@index([ownerId])
+  @@index([email])
+}
+
+model AdvertiserMember {
+  id            String      @id @default(cuid())
+  advertiserId  String
+  advertiser    Advertiser  @relation(fields: [advertiserId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role          String      @default("MANAGER") // OWNER, MANAGER, BILLING, VIEWER
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([advertiserId, userId])
+  @@index([advertiserId])
+  @@index([userId])
+}
+
+model AdPlacement {
+  id                String                 @id @default(cuid())
+  placementKey      String                 @unique // e.g. "home_top", "article_inline_1", "magazine_sidebar", "marketplace_top"
+  name              String                 // e.g. "হোমপেজ টপ লিডারবোর্ড ব্যানার"
+  description       String?
+  pageType          String                 @default("HOME") // HOME, ARTICLE, ESSAY, MAGAZINE, MARKETPLACE, RESEARCH, GLOBAL
+  desktopWidth      Int                    @default(728)
+  desktopHeight     Int                    @default(90)
+  tabletWidth       Int?                   @default(468)
+  tabletHeight      Int?                   @default(60)
+  mobileWidth       Int                    @default(320)
+  mobileHeight      Int                    @default(50)
+  supportedFormats  String                 @default("[\"LEADERBOARD_BANNER\",\"RESPONSIVE_BANNER\"]") // JSON array
+  maxAds            Int                    @default(1)
+  position          String?                @default("TOP") // TOP, HERO_BELOW, MIDDLE, BOTTOM, SIDEBAR, INLINE
+  rotationRule      String                 @default("WEIGHTED") // WEIGHTED, EVEN, PRIORITY
+  frequencyCap      Int                    @default(5) // Max impressions per user session/day
+  isLazyLoad        Boolean                @default(true)
+  isBlocked         Boolean                @default(false) // Hard editorial block (e.g. sensitive pages)
+  status            String                 @default("ACTIVE") // ACTIVE, INACTIVE
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+
+  campaignPlacements AdCampaignPlacement[]
+  pricingPackages    AdPricingPackage[]
+  impressions        AdImpressionEvent[]
+  clicks             AdClickEvent[]
+
+  @@index([pageType])
+  @@index([status])
+  @@index([position])
+}
+
+model AdPricingPackage {
+  id                  String       @id @default(cuid())
+  name                String       // e.g. "হোমপেজ ১ সপ্তাহের প্রিমিয়াম প্যাকেজ"
+  description         String?
+  placementId         String?
+  placement           AdPlacement? @relation(fields: [placementId], references: [id], onDelete: SetNull)
+  pricingModel        String       @default("FIXED_TENURE") // FIXED_TENURE, CPM, CPC, SPONSORSHIP
+  durationDays        Int          @default(7) // 7, 15, 30 days
+  price               Float        @default(1000.0) // In BDT
+  includedImpressions Int?         // Est or capped impressions if any
+  includedClicks      Int?         // Est or capped clicks if any
+  isFeatured          Boolean      @default(false)
+  status              String       @default("ACTIVE") // ACTIVE, INACTIVE
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  campaigns           AdCampaign[]
+
+  @@index([placementId])
+  @@index([pricingModel])
+  @@index([status])
+}
+
+model AdCreative {
+  id               String               @id @default(cuid())
+  advertiserId     String
+  advertiser       Advertiser           @relation(fields: [advertiserId], references: [id], onDelete: Cascade)
+  name             String               // e.g. "শীতকালীন বইমেলা অফার ব্যানার"
+  format           String               @default("LEADERBOARD_BANNER") // LEADERBOARD_BANNER, LARGE_RECTANGLE, MEDIUM_RECTANGLE, SQUARE_BANNER, SIDEBAR_BANNER, RESPONSIVE_BANNER, NATIVE_AD, SPONSORED_ARTICLE, SPONSORED_BOOK, SPONSORED_PUBLISHER, TEXT_AD, VIDEO_AD, ANNOUNCEMENT
+  mediaUrl         String               // Image / Video storage path or URL
+  mimeType         String               @default("image/webp")
+  mediaSize        Int?                 // File size in bytes
+  headline         String?              // Required for Native & Text ads
+  description      String?              // Body copy
+  ctaText          String?              @default("বিস্তারিত দেখুন") // e.g. "এখনই কিনুন", "অর্ডার করুন", "পড়ুন"
+  destinationUrl   String               // Safe validated target URL
+  altText          String?              // Accessibility text
+  mobileMediaUrl   String?              // Optional mobile-optimized creative variant
+  desktopMediaUrl  String?
+  language         String               @default("bn") // bn, ar, en
+  approvalStatus   String               @default("DRAFT") // DRAFT, PENDING_REVIEW, APPROVED, REJECTED, REVISION_REQUIRED
+  rejectionReason  String?
+  reviewNotes      String?              // Internal reviewer feedback
+  approvedById     String?
+  approvedBy       User?                @relation("CreativeApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt       DateTime?
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  campaignCreatives AdCampaignCreative[]
+  impressions      AdImpressionEvent[]
+  clicks           AdClickEvent[]
+
+  @@index([advertiserId])
+  @@index([format])
+  @@index([approvalStatus])
+}
+
+model AdCampaign {
+  id                  String               @id @default(cuid())
+  campaignNumber      String               @unique // e.g. "SL-AD-2026-0001"
+  advertiserId        String
+  advertiser          Advertiser           @relation(fields: [advertiserId], references: [id], onDelete: Cascade)
+  name                String               // e.g. "কুরআন শিক্ষা অ্যাপ প্রমোশন ক্যাম্পেইন"
+  objective           String               @default("BRAND_AWARENESS") // BRAND_AWARENESS, TRAFFIC, SALES, APP_PROMOTION
+  campaignType        String               @default("BANNER") // BANNER, NATIVE, SPONSORSHIP, PRODUCT_FEATURE
+  pricingModel        String               @default("FIXED_TENURE") // FIXED_TENURE, CPM, CPC, SPONSORSHIP
+  pricingPackageId    String?
+  pricingPackage      AdPricingPackage?    @relation(fields: [pricingPackageId], references: [id], onDelete: SetNull)
+  budget              Float                @default(0.0)
+  spentAmount         Float                @default(0.0)
+  agreedPrice         Float                @default(0.0)
+  startDate           DateTime
+  endDate             DateTime
+  deliveryPriority    Int                  @default(5) // 1 (lowest) to 10 (highest)
+  frequencyCapPerUser Int                  @default(3) // Impressions per user per day
+  dailyDeliveryLimit  Int?                 // Optional cap on daily impressions/spend
+  targetingRules      String?              @default("{}") // JSON string
+  approvalStatus      String               @default("DRAFT") // DRAFT, SUBMITTED, UNDER_REVIEW, REVISION_REQUIRED, APPROVED, REJECTED
+  status              String               @default("DRAFT") // DRAFT, PENDING_APPROVAL, SCHEDULED, ACTIVE, PAUSED, COMPLETED, CANCELLED, EXPIRED
+  billingStatus       String               @default("UNPAID") // UNPAID, PARTIALLY_PAID, PAID, REFUNDED
+  createdById         String
+  createdBy           User                 @relation("CampaignCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  approvedById        String?
+  approvedBy          User?                @relation("CampaignApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+  reviewedAt          DateTime?
+  rejectionReason     String?
+  notes               String?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  placements          AdCampaignPlacement[]
+  creatives           AdCampaignCreative[]
+  invoices            AdInvoice[]
+  payments            AdPayment[]
+  impressions         AdImpressionEvent[]
+  clicks              AdClickEvent[]
+  staffAssignments    AdStaffAssignment[]
+
+  @@index([advertiserId])
+  @@index([status])
+  @@index([approvalStatus])
+  @@index([billingStatus])
+  @@index([startDate, endDate])
+  @@index([deliveryPriority])
+}
+
+model AdCampaignPlacement {
+  id            String       @id @default(cuid())
+  campaignId    String
+  campaign      AdCampaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  placementId   String
+  placement     AdPlacement  @relation(fields: [placementId], references: [id], onDelete: Cascade)
+  createdAt     DateTime     @default(now())
+
+  @@unique([campaignId, placementId])
+  @@index([campaignId])
+  @@index([placementId])
+}
+
+model AdCampaignCreative {
+  id            String       @id @default(cuid())
+  campaignId    String
+  campaign      AdCampaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  creativeId    String
+  creative      AdCreative   @relation(fields: [creativeId], references: [id], onDelete: Cascade)
+  weight        Int          @default(100) // Rotation weight (1-100)
+  createdAt     DateTime     @default(now())
+
+  @@unique([campaignId, creativeId])
+  @@index([campaignId])
+  @@index([creativeId])
+}
+
+model AdInvoice {
+  id              String       @id @default(cuid())
+  invoiceNumber   String       @unique // e.g. "INV-AD-2026-0001"
+  advertiserId    String
+  advertiser      Advertiser   @relation(fields: [advertiserId], references: [id], onDelete: Cascade)
+  campaignId      String?
+  campaign        AdCampaign?  @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  amount          Float        @default(0.0)
+  taxAmount       Float        @default(0.0)
+  discountAmount  Float        @default(0.0)
+  totalAmount     Float        @default(0.0)
+  currency        String       @default("BDT")
+  status          String       @default("DRAFT") // DRAFT, ISSUED, PAID, OVERDUE, CANCELLED, REFUNDED
+  dueDate         DateTime
+  paidAt          DateTime?
+  notes           String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  payments        AdPayment[]
+
+  @@index([advertiserId])
+  @@index([campaignId])
+  @@index([status])
+  @@index([invoiceNumber])
+}
+
+model AdPayment {
+  id              String       @id @default(cuid())
+  transactionId   String       @unique // Gateway or bank transaction id
+  invoiceId       String?
+  invoice         AdInvoice?   @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  advertiserId    String
+  advertiser      Advertiser   @relation(fields: [advertiserId], references: [id], onDelete: Cascade)
+  campaignId      String?
+  campaign        AdCampaign?  @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  amount          Float
+  currency        String       @default("BDT")
+  paymentGateway  String       @default("BKASH") // BKASH, NAGAD, SSLCOMMERZ, BANK_TRANSFER, MANUAL
+  gatewayRef      String?      // Reference token or payment ID from provider
+  status          String       @default("PENDING") // PENDING, COMPLETED, FAILED, CANCELLED, REFUNDED
+  verifiedAt      DateTime?
+  rawResponse     String?      // JSON string of gateway callback
+  notes           String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  refunds         AdRefund[]
+
+  @@index([advertiserId])
+  @@index([campaignId])
+  @@index([invoiceId])
+  @@index([status])
+  @@index([transactionId])
+}
+
+model AdRefund {
+  id              String       @id @default(cuid())
+  paymentId       String
+  payment         AdPayment    @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  advertiserId    String
+  advertiser      Advertiser   @relation(fields: [advertiserId], references: [id], onDelete: Cascade)
+  amount          Float
+  reason          String
+  status          String       @default("REQUESTED") // REQUESTED, APPROVED, PROCESSED, REJECTED
+  processedById   String?
+  processedAt     DateTime?
+  notes           String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([paymentId])
+  @@index([advertiserId])
+  @@index([status])
+}
+
+model AdImpressionEvent {
+  id                  String       @id @default(cuid())
+  eventType           String       @default("IMPRESSION") // REQUEST, IMPRESSION, VIEWABLE_IMPRESSION
+  campaignId          String
+  campaign            AdCampaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  creativeId          String
+  creative            AdCreative   @relation(fields: [creativeId], references: [id], onDelete: Cascade)
+  placementId         String
+  placement           AdPlacement  @relation(fields: [placementId], references: [id], onDelete: Cascade)
+  advertiserId        String
+  userIpHash          String       // SHA-256 hash
+  deviceClass         String       @default("DESKTOP") // DESKTOP, MOBILE, TABLET
+  pageUrl             String?
+  anonymousSessionId  String?
+  timestamp           DateTime     @default(now())
+
+  @@index([campaignId])
+  @@index([placementId])
+  @@index([creativeId])
+  @@index([advertiserId])
+  @@index([timestamp])
+  @@index([eventType])
+}
+
+model AdClickEvent {
+  id                  String       @id @default(cuid())
+  campaignId          String
+  campaign            AdCampaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  creativeId          String
+  creative            AdCreative   @relation(fields: [creativeId], references: [id], onDelete: Cascade)
+  placementId         String
+  placement           AdPlacement  @relation(fields: [placementId], references: [id], onDelete: Cascade)
+  advertiserId        String
+  destinationUrl      String
+  userIpHash          String       // SHA-256 hash
+  anonymousSessionId  String?
+  isValid             Boolean      @default(true) // False if bot or rapid click fraud
+  invalidReason       String?      // e.g. "RAPID_CLICK", "BOT_UA", "SELF_CLICK"
+  timestamp           DateTime     @default(now())
+
+  @@index([campaignId])
+  @@index([placementId])
+  @@index([creativeId])
+  @@index([advertiserId])
+  @@index([timestamp])
+  @@index([isValid])
+}
+
+model AdDailyMetric {
+  id                       String   @id @default(cuid())
+  date                     String   // "YYYY-MM-DD"
+  campaignId               String?
+  placementId              String?
+  advertiserId             String?
+  requestsCount            Int      @default(0)
+  impressionsCount         Int      @default(0)
+  viewableImpressionsCount Int      @default(0)
+  clicksCount              Int      @default(0)
+  spendAmount              Float    @default(0.0)
+  uniqueUsersCount         Int      @default(0)
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  @@unique([date, campaignId, placementId])
+  @@index([date])
+  @@index([campaignId])
+  @@index([placementId])
+  @@index([advertiserId])
+}
+
+model AdStaffAssignment {
+  id              String       @id @default(cuid())
+  staffId         String
+  staff           User         @relation("StaffAdAssignee", fields: [staffId], references: [id], onDelete: Cascade)
+  advertiserId    String?
+  advertiser      Advertiser?  @relation(fields: [advertiserId], references: [id], onDelete: SetNull)
+  campaignId      String?
+  campaign        AdCampaign?  @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  role            String       @default("ACCOUNT_MANAGER") // SALES_MANAGER, ACCOUNT_MANAGER, AD_REVIEWER, BILLING_OFFICER
+  commissionRate  Float        @default(0.0) // Percentage (e.g. 5.0 for 5%)
+  notes           String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([staffId])
+  @@index([advertiserId])
+  @@index([campaignId])
+}
+
+model AdAuditLog {
+  id              String       @id @default(cuid())
+  actorId         String?
+  actor           User?        @relation("AdAuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+  actorName       String?
+  actorRole       String?
+  action          String       // e.g. "CAMPAIGN_APPROVED", "CREATIVE_REJECTED", "PAYMENT_VERIFIED", "PLACEMENT_TOGGLED"
+  entityType      String       // CAMPAIGN, CREATIVE, PLACEMENT, ADVERTISER, INVOICE, PAYMENT, POLICY
+  entityId        String?
+  details         String?      // JSON string
+  ipAddress       String?      // Coarse or hashed
+  createdAt       DateTime     @default(now())
+
+  @@index([actorId])
+  @@index([action])
+  @@index([entityType])
+  @@index([createdAt])
+}
+
+model AdPolicySetting {
+  id              String       @id @default(cuid())
+  key             String       @unique // e.g. "disallowed_categories", "max_daily_budget", "frequency_cap_default"
+  value           String
+  description     String?
+  updatedAt       DateTime     @updatedAt
+}
+
+// ==========================================
+// CENTRAL MEDIA MANAGEMENT & DAM SYSTEM
+// ==========================================
+
+model MediaFolder {
+  id              String         @id @default(cuid())
+  name            String
+  slug            String         @unique
+  parentId        String?
+  color           String?        @default("#C49A45")
+  icon            String?        @default("folder")
+  createdBy       String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  parent          MediaFolder?   @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  subfolders      MediaFolder[]  @relation("FolderHierarchy")
+  assets          MediaAsset[]
+
+  @@index([parentId])
+  @@index([slug])
+  @@index([createdAt])
+}
+
+model MediaAsset {
+  id                String            @id @default(cuid())
+  title             String
+  altText           String?
+  caption           String?
+  description       String?
+  fileName          String
+  originalName      String
+  storageKey        String            @unique // Unique path or S3 key
+  storageType       String            @default("LOCAL") // LOCAL, S3, CLOUD
+  publicUrl         String
+  thumbnailUrl      String?
+  mediumUrl         String?
+  mimeType          String
+  extension         String
+  mediaType         String            // IMAGE, PDF, DOCUMENT, AUDIO, VIDEO, ARCHIVE, OTHER
+  fileSizeBytes     Int
+  fileSizeFormatted String
+  width             Int?
+  height            Int?
+  aspectRatio       String?
+  duration          Float?            // in seconds for audio/video
+  pageCount         Int?              // for PDFs / documents
+  checksum          String?           // SHA-256 hash for duplicate detection
+  visibility        String            @default("PUBLIC") // PUBLIC, PRIVATE, RESTRICTED
+  isTrash           Boolean           @default(false)
+  trashedAt         DateTime?
+  folderId          String?
+  uploadedBy        String?           // Operator name or userId
+  publisherId       String?
+  magazineId        String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  folder            MediaFolder?      @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  variants          MediaVariant[]
+  references        MediaReference[]
+  tags              MediaAssetTag[]
+
+  @@index([mediaType])
+  @@index([visibility])
+  @@index([isTrash])
+  @@index([folderId])
+  @@index([checksum])
+  @@index([createdAt])
+}
+
+model MediaVariant {
+  id                String       @id @default(cuid())
+  assetId           String
+  variantName       String       // THUMBNAIL, MEDIUM, WEBP, OPTIMIZED
+  storageKey        String
+  publicUrl         String
+  width             Int?
+  height            Int?
+  fileSizeBytes     Int
+  mimeType          String
+  createdAt         DateTime     @default(now())
+
+  asset             MediaAsset   @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@index([assetId])
+  @@index([variantName])
+}
+
+model MediaReference {
+  id                String       @id @default(cuid())
+  assetId           String
+  module            String       // PRODUCT, BOOK, BANNER, MAGAZINE, ISSUE, ARTICLE, AUTHOR, PUBLISHER, ADS_CREATIVE, AVATAR, ISLAMIC_AI
+  entityId          String       // Foreign ID of referencing record
+  entityTitle       String?
+  field             String?      // e.g. "coverImage", "pdfUrl", "avatarUrl", "mediaUrl"
+  createdAt         DateTime     @default(now())
+
+  asset             MediaAsset   @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([assetId, module, entityId, field])
+  @@index([assetId])
+  @@index([module, entityId])
+}
+
+model MediaTag {
+  id                String          @id @default(cuid())
+  name              String          @unique
+  slug              String          @unique
+  color             String?         @default("#C49A45")
+  createdAt         DateTime        @default(now())
+
+  assets            MediaAssetTag[]
+
+  @@index([name])
+  @@index([slug])
+}
+
+model MediaAssetTag {
+  id                String       @id @default(cuid())
+  assetId           String
+  tagId             String
+
+  asset             MediaAsset   @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  tag               MediaTag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([assetId, tagId])
+  @@index([assetId])
+  @@index([tagId])
+}
+
+model MediaAuditLog {
+  id                String       @id @default(cuid())
+  assetId           String?
+  action            String       // UPLOAD, EDIT, DELETE, RESTORE, TRASH, MOVE, BULK_DELETE, SIGNED_URL_ACCESS
+  actorId           String?
+  actorName         String?
+  details           String?      // JSON string
+  ipAddress         String?
+  createdAt         DateTime     @default(now())
+
+  @@index([assetId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

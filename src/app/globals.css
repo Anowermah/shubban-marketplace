@@ -1,0 +1,115 @@
+/* ==============================================================================
+   Bornomala Bengali Font Family (Self-Hosted WOFF2 with CDN Fallback)
+   ============================================================================== */
+@font-face {
+  font-family: 'Bornomala';
+  src: url('/fonts/Bornomala-Regular.woff2') format('woff2'),
+       url('https://kriti.app/cdn/Bornomala-Regular.woff2') format('woff2');
+  font-weight: 300 500;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0964-0965, U+0980-09FF, U+200C-200D, U+20B9, U+25CC;
+}
+
+@font-face {
+  font-family: 'Bornomala';
+  src: url('/fonts/Bornomala-Bold.woff2') format('woff2'),
+       url('https://kriti.app/cdn/Bornomala-Bold.woff2') format('woff2');
+  font-weight: 600 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0964-0965, U+0980-09FF, U+200C-200D, U+20B9, U+25CC;
+}
+
+/* Base Google Fonts for Latin / Complementary scripts */
+@import url('https://fonts.googleapis.com/css2?family=Galada&family=Hind+Siliguri:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary-color: #123D32;
+  --secondary-color: #F8F5ED;
+  --accent-color: #C49A45;
+  --text-charcoal: #222522;
+  --font-bengali: 'Bornomala', 'Hind Siliguri', 'Noto Sans Bengali', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ==============================================================================
+   Universal Global Bengali Typography Enforcement
+   Applies Bornomala to all Bengali text across every section, element, & component
+   while cleanly preserving native English/Latin fonts for non-Bengali characters.
+   ============================================================================== */
+html,
+body,
+h1, h2, h3, h4, h5, h6,
+p, span, a, li, blockquote,
+button, input, select, textarea, label,
+table, th, td, caption,
+dialog,
+[class*="modal"], [class*="popup"], [class*="dialog"],
+[class*="drawer"], [class*="tooltip"], [class*="popover"], [class*="toast"],
+[class*="menu"], [class*="nav"], [class*="header"], [class*="footer"] {
+  font-family: 'Bornomala', 'Hind Siliguri', 'Noto Sans Bengali', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Ensure form controls and placeholders inherit Bornomala */
+input,
+textarea,
+select,
+button {
+  font-family: inherit;
+}
+
+input::placeholder,
+textarea::placeholder {
+  font-family: 'Bornomala', 'Hind Siliguri', 'Noto Sans Bengali', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Explicit Bengali Language Tag Selector */
+:lang(bn),
+[lang="bn"],
+[lang^="bn-"],
+.font-bengali {
+  font-family: 'Bornomala', 'Hind Siliguri', 'Noto Sans Bengali', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+body {
+  color: #222522;
+  background-color: #F8F5ED;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.dark body {
+  color: #E2E8F0;
+  background-color: #0D1714;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #C49A45;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9E782E;
+}
+
+/* Print Styles */
+@media print {
+  header, footer, nav, .no-print {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+    color: black !important;
+  }
+}

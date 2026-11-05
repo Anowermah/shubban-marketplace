@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 450" width="300" height="450">
+  <rect width="300" height="450" fill="#123D32" rx="12"/>
+  <rect x="15" y="15" width="270" height="420" fill="none" stroke="#C49A45" stroke-width="2" rx="8" stroke-opacity="0.4"/>
+  <circle cx="150" cy="180" r="50" fill="#1B4D3E"/>
+  <path d="M130 170 C135 160 145 160 150 170 C155 160 165 160 170 170 V195 C165 185 155 185 150 195 C145 185 135 185 130 195 Z" fill="#C49A45"/>
+  <text x="150" y="270" font-family="'Hind Siliguri', 'Noto Sans Bengali', sans-serif" font-size="20" font-weight="bold" fill="#F8F5ED" text-anchor="middle">শুব্বান লাইব্রেরী</text>
+  <text x="150" y="300" font-family="'Hind Siliguri', 'Noto Sans Bengali', sans-serif" font-size="13" fill="#C49A45" text-anchor="middle">ডিজিটাল ও মুদ্রিত প্রকাশনা</text>
+  <line x1="80" y1="330" x2="220" y2="330" stroke="#C49A45" stroke-width="1" stroke-opacity="0.3"/>
+</svg>
+

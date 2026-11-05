@@ -1,0 +1,102 @@
+{
+  "name": "Shubban Admin",
+  "short_name": "Admin",
+  "description": "শুব্বান লাইব্রেরী এন্টারপ্রাইজ অ্যাডমিন ও সেন্ট্রাল ম্যানেজমেন্ট কনসোল",
+  "start_url": "/admin",
+  "scope": "/admin",
+  "id": "shubban-admin-management-pwa",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui",
+    "window-controls-overlay"
+  ],
+  "theme_color": "#D97706",
+  "background_color": "#0C0A09",
+  "orientation": "any",
+  "lang": "bn",
+  "dir": "ltr",
+  "categories": [
+    "business",
+    "productivity",
+    "management"
+  ],
+  "icons": [
+    {
+      "src": "/icons/admin/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/admin/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/admin/icon-maskable-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/admin/icon-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "অর্ডার ব্যবস্থাপনা (Orders)",
+      "short_name": "অর্ডার",
+      "description": "গ্রাহকদের নতুন ও প্রক্রিয়াকরণাধীন অর্ডার",
+      "url": "/admin/orders",
+      "icons": [
+        {
+          "src": "/icons/admin/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "বই ও ক্যাটালগ (Books)",
+      "short_name": "ক্যাটালগ",
+      "description": "পণ্য স্টক, মূল্য ও ইনভেন্টরি ম্যানেজমেন্ট",
+      "url": "/admin/books",
+      "icons": [
+        {
+          "src": "/icons/admin/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "গ্রাহক ও সদস্য (Customers)",
+      "short_name": "গ্রাহক",
+      "description": "নিবন্ধিত পাঠক ও গ্রাহক প্রোফাইল",
+      "url": "/admin/customers",
+      "icons": [
+        {
+          "src": "/icons/admin/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "আর্থিক রিপোর্ট (Reports)",
+      "short_name": "রিপোর্ট",
+      "description": "মাসিক রাজস্ব ও বিক্রয় অ্যানালিটিক্স",
+      "url": "/admin/reports",
+      "icons": [
+        {
+          "src": "/icons/admin/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false
+}
+

@@ -1,0 +1,109 @@
+{
+  "name": "Shubban Libery",
+  "short_name": "Shubban",
+  "description": "শুব্বান লাইব্রেরী — বই, জ্ঞান ও মননশীলতার এক সমৃদ্ধ ঠিকানা। উন্মুক্ত ও প্রিমিয়াম ডিজিটাল লাইব্রেরী ও অনলাইন বুকশপ।",
+  "start_url": "/",
+  "scope": "/",
+  "id": "shubban-libery-main-pwa",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui",
+    "window-controls-overlay"
+  ],
+  "theme_color": "#C49A45",
+  "background_color": "#0E241D",
+  "orientation": "any",
+  "lang": "bn",
+  "dir": "ltr",
+  "categories": [
+    "books",
+    "shopping",
+    "education",
+    "lifestyle"
+  ],
+  "icons": [
+    {
+      "src": "/icons/main/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/main/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/main/icon-maskable-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/main/icon-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/main/icon-monochrome.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "monochrome"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "ইসলামিক এআই (Islamic AI)",
+      "short_name": "AI সহকারী",
+      "description": "ইসলামিক প্রশ্ন ও প্রামাণ্য গবেষণা সহকারী",
+      "url": "/islamic-ai",
+      "icons": [
+        {
+          "src": "/icons/main/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "বই সম্ভার (Book Catalog)",
+      "short_name": "বইসমূহ",
+      "description": "সমস্ত মুদ্রিত ও ডিজিটাল বাংলা বই ব্রাউজ করুন",
+      "url": "/books",
+      "icons": [
+        {
+          "src": "/icons/main/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "অর্ডার ট্র্যাকিং (Track Order)",
+      "short_name": "অর্ডার ট্র্যাক",
+      "description": "লাইভ পার্সেল ও ডেলিভারি স্ট্যাটাস দেখুন",
+      "url": "/track-order",
+      "icons": [
+        {
+          "src": "/icons/main/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "শপিং কার্ট (My Cart)",
+      "short_name": "কার্ট",
+      "description": "নির্বাচিত বইয়ের শপিং কার্ট ও চেকআউট",
+      "url": "/cart",
+      "icons": [
+        {
+          "src": "/icons/main/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false
+}
+

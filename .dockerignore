@@ -1,0 +1,16 @@
+.git
+.github
+.next
+node_modules
+npm-debug.log
+yarn-error.log
+backups
+dev.db
+dev.db-journal
+*.log
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+

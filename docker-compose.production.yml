@@ -1,0 +1,100 @@
+version: '3.8'
+
+# ==============================================================================
+# Shubban Library - Multi-Vendor Marketplace Production Docker Compose Stack
+# ==============================================================================
+
+services:
+  # ----------------------------------------------------------------------------
+  # Next.js Application Service
+  # ----------------------------------------------------------------------------
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: shubban_marketplace_app
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-shubban_admin}:${POSTGRES_PASSWORD:-shubban_secure_pass}@postgres:5432/${POSTGRES_DB:-shubban_production}?schema=public&sslmode=prefer
+      - NEXTAUTH_URL=${NEXT_PUBLIC_APP_URL:-https://shubbanlibrary.com}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-https://shubbanlibrary.com}
+      - SSLCOMMERZ_STORE_ID=${SSLCOMMERZ_STORE_ID}
+      - SSLCOMMERZ_STORE_PASS=${SSLCOMMERZ_STORE_PASS}
+      - SSLCOMMERZ_IS_LIVE=${SSLCOMMERZ_IS_LIVE:-true}
+      - BKASH_APP_KEY=${BKASH_APP_KEY}
+      - BKASH_APP_SECRET=${BKASH_APP_SECRET}
+      - BKASH_USERNAME=${BKASH_USERNAME}
+      - BKASH_PASSWORD=${BKASH_PASSWORD}
+      - BKASH_IS_LIVE=${BKASH_IS_LIVE:-true}
+      - PATHAO_CLIENT_ID=${PATHAO_CLIENT_ID}
+      - PATHAO_CLIENT_SECRET=${PATHAO_CLIENT_SECRET}
+      - STEADFAST_API_KEY=${STEADFAST_API_KEY}
+      - STEADFAST_SECRET_KEY=${STEADFAST_SECRET_KEY}
+    volumes:
+      - app_uploads:/app/public/uploads
+      - app_backups:/app/backups
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - shubban_network
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2048M
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # ----------------------------------------------------------------------------
+  # PostgreSQL 16 Managed Database Service
+  # ----------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: shubban_marketplace_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-shubban_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-shubban_secure_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-shubban_production}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-shubban_admin} -d ${POSTGRES_DB:-shubban_production}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    ports:
+      - "127.0.0.1:5432:5432" # Localhost only, never expose DB to public internet
+    networks:
+      - shubban_network
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2048M
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+volumes:
+  postgres_data:
+    name: shubban_postgres_prod_data
+  app_uploads:
+    name: shubban_app_uploads
+  app_backups:
+    name: shubban_db_backups
+
+networks:
+  shubban_network:
+    driver: bridge
+
