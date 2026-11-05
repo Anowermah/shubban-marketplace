@@ -69,204 +69,241 @@ const bookCardSelect = {
 };
 
 export default async function HomePage() {
-  // Concurrent data fetching with lean projections and cached settings
-  const [
-    siteSettingsList,
-    homepageSectionsDb,
-    heroSlidesDb,
-    featuredBooks,
-    newArrivals,
-    bestSellers,
-    freeBooks,
-    recentIssues,
-    latestArticles,
-    researchPapers,
-    questions,
-    authors,
-    publishers,
-    donationCampaigns,
-    featuredVendors,
-    lifestyleProducts,
-    islamicBooks,
-  ] = await Promise.all([
-    getCachedSiteSettings(),
-    getCachedHomepageSections(),
-    getCachedHeroSlides(),
-    prisma.book.findMany({
-      where: { isFeatured: true },
-      select: bookCardSelect,
-      take: 6,
-    }),
-    prisma.book.findMany({
-      where: { isNewArrival: true },
-      select: bookCardSelect,
-      take: 6,
-    }),
-    prisma.book.findMany({
-      where: { isBestSeller: true },
-      select: bookCardSelect,
-      take: 6,
-    }),
-    prisma.book.findMany({
-      where: { isFree: true, isDigitalAvailable: true },
-      select: bookCardSelect,
-      take: 6,
-    }),
-    prisma.publicationIssue.findMany({
-      select: {
-        id: true,
-        issueTitle: true,
-        volume: true,
-        issueNumber: true,
-        summary: true,
-        coverImage: true,
-        publicationDate: true,
-        magazine: { select: { id: true, title: true, slug: true } },
-      },
-      orderBy: { publicationDate: 'desc' },
-      take: 3,
-    }),
-    prisma.article.findMany({
-      where: { status: 'PUBLISHED' },
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        excerpt: true,
-        coverImage: true,
-        publishedAt: true,
-        readingTime: true,
-        author: { select: { name: true, photoUrl: true } },
-        category: { select: { name: true, slug: true } },
-      },
-      orderBy: { publishedAt: 'desc' },
-      take: 3,
-    }),
-    prisma.researchPaper.findMany({
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        abstract: true,
-        doi: true,
-        institution: true,
-        createdAt: true,
-        author: { select: { name: true } },
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 2,
-    }),
-    prisma.question.findMany({
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        content: true,
-        views: true,
-        createdAt: true,
-        category: { select: { name: true } },
-        _count: { select: { answers: true, votes: true } },
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 3,
-    }),
-    prisma.author.findMany({
-      where: { isFeatured: true },
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        photoUrl: true,
-        bio: true,
-        _count: { select: { books: true } },
-      },
-      take: 4,
-    }),
-    prisma.publisher.findMany({
-      where: { isFeatured: true },
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        logoUrl: true,
-        description: true,
-        _count: { select: { books: true } },
-      },
-      take: 4,
-    }),
-    prisma.donationCampaign.findMany({
-      where: { status: 'ACTIVE' },
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        category: true,
-        description: true,
-        coverImage: true,
-        goalAmount: true,
-        raisedAmount: true,
-        donorCount: true,
-      },
-      take: 3,
-      orderBy: { raisedAmount: 'desc' },
-    }),
-    prisma.vendor.findMany({
-      where: { status: 'APPROVED' },
-      take: 3,
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        logoUrl: true,
-        bannerUrl: true,
-        description: true,
-        city: true,
-        books: {
-          take: 3,
-          select: { id: true, title: true, coverImage: true, price: true, discountPrice: true, slug: true },
+  // Concurrent data fetching with lean projections, resilient fallbacks and cached settings
+  let siteSettingsList: any[] = [];
+  let homepageSectionsDb: any[] = [];
+  let heroSlidesDb: any[] = [];
+  let featuredBooks: any[] = [];
+  let newArrivals: any[] = [];
+  let bestSellers: any[] = [];
+  let freeBooks: any[] = [];
+  let recentIssues: any[] = [];
+  let latestArticles: any[] = [];
+  let researchPapers: any[] = [];
+  let questions: any[] = [];
+  let authors: any[] = [];
+  let publishers: any[] = [];
+  let donationCampaigns: any[] = [];
+  let featuredVendors: any[] = [];
+  let lifestyleProducts: any[] = [];
+  let islamicBooks: any[] = [];
+
+  try {
+    [
+      siteSettingsList,
+      homepageSectionsDb,
+      heroSlidesDb,
+      featuredBooks,
+      newArrivals,
+      bestSellers,
+      freeBooks,
+      recentIssues,
+      latestArticles,
+      researchPapers,
+      questions,
+      authors,
+      publishers,
+      donationCampaigns,
+      featuredVendors,
+      lifestyleProducts,
+      islamicBooks,
+    ] = await Promise.all([
+      getCachedSiteSettings(),
+      getCachedHomepageSections(),
+      getCachedHeroSlides(),
+      prisma.book.findMany({
+        where: { isFeatured: true },
+        select: bookCardSelect,
+        take: 6,
+      }),
+      prisma.book.findMany({
+        where: { isNewArrival: true },
+        select: bookCardSelect,
+        take: 6,
+      }),
+      prisma.book.findMany({
+        where: { isBestSeller: true },
+        select: bookCardSelect,
+        take: 6,
+      }),
+      prisma.book.findMany({
+        where: { isFree: true, isDigitalAvailable: true },
+        select: bookCardSelect,
+        take: 6,
+      }),
+      prisma.publicationIssue.findMany({
+        select: {
+          id: true,
+          issueTitle: true,
+          volume: true,
+          issueNumber: true,
+          summary: true,
+          coverImage: true,
+          publicationDate: true,
+          magazine: { select: { id: true, title: true, slug: true } },
         },
-      },
-    }),
-    prisma.book.findMany({
-      where: {
-        category: { slug: 'islamic-lifestyle' },
-      },
-      select: {
-        ...bookCardSelect,
-        description: true,
-        vendor: { select: { id: true, name: true, slug: true } },
-        variants: { select: { id: true, name: true, price: true } },
-      },
-      take: 4,
-    }),
-    prisma.book.findMany({
-      where: {
-        OR: [
-          { category: { slug: 'islamic' } },
-          { category: { slug: 'philosophy' } },
-        ],
-      },
-      select: bookCardSelect,
-      take: 6,
-    }),
-  ]);
+        orderBy: { publicationDate: 'desc' },
+        take: 3,
+      }),
+      prisma.article.findMany({
+        where: { status: 'PUBLISHED' },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          excerpt: true,
+          coverImage: true,
+          publishedAt: true,
+          readingTime: true,
+          author: { select: { name: true, photoUrl: true } },
+          category: { select: { name: true, slug: true } },
+        },
+        orderBy: { publishedAt: 'desc' },
+        take: 3,
+      }),
+      prisma.researchPaper.findMany({
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          abstract: true,
+          doi: true,
+          institution: true,
+          createdAt: true,
+          author: { select: { name: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 2,
+      }),
+      prisma.question.findMany({
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          content: true,
+          views: true,
+          createdAt: true,
+          category: { select: { name: true } },
+          _count: { select: { answers: true, votes: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 3,
+      }),
+      prisma.author.findMany({
+        where: { isFeatured: true },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          photoUrl: true,
+          bio: true,
+          _count: { select: { books: true } },
+        },
+        take: 4,
+      }),
+      prisma.publisher.findMany({
+        where: { isFeatured: true },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          logoUrl: true,
+          description: true,
+          _count: { select: { books: true } },
+        },
+        take: 4,
+      }),
+      prisma.donationCampaign.findMany({
+        where: { status: 'ACTIVE' },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          category: true,
+          description: true,
+          coverImage: true,
+          goalAmount: true,
+          raisedAmount: true,
+          donorCount: true,
+        },
+        take: 3,
+        orderBy: { raisedAmount: 'desc' },
+      }),
+      prisma.vendor.findMany({
+        where: { status: 'APPROVED' },
+        take: 3,
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          logoUrl: true,
+          bannerUrl: true,
+          description: true,
+          city: true,
+          books: {
+            take: 3,
+            select: { id: true, title: true, coverImage: true, price: true, discountPrice: true, slug: true },
+          },
+        },
+      }),
+      prisma.book.findMany({
+        where: {
+          category: { slug: 'islamic-lifestyle' },
+        },
+        select: {
+          ...bookCardSelect,
+          description: true,
+          vendor: { select: { id: true, name: true, slug: true } },
+          variants: { select: { id: true, name: true, price: true } },
+        },
+        take: 4,
+      }),
+      prisma.book.findMany({
+        where: {
+          OR: [
+            { category: { slug: 'islamic' } },
+            { category: { slug: 'philosophy' } },
+          ],
+        },
+        select: bookCardSelect,
+        take: 6,
+      }),
+    ]);
+  } catch (error) {
+    console.warn('[HomePage] Database query fallback triggered:', error);
+  }
 
   // Transform hero slides into format expected by slider
-  const initialHeroSlides: DynamicHeroSlide[] = heroSlidesDb.map((s) => ({
-    id: s.id,
-    badge: s.badge,
-    badgeIcon: s.badgeIcon,
-    headline: s.headline,
-    subhead: s.subhead,
-    couponCode: s.couponCode,
-    primaryCtaText: s.primaryCtaText,
-    primaryCtaLink: s.primaryCtaLink,
-    secondaryCtaText: s.secondaryCtaText,
-    secondaryCtaLink: s.secondaryCtaLink,
-    bgGradient: s.bgGradient,
-    image: s.imageUrl,
-    imageUrl: s.imageUrl,
-  }));
+  const initialHeroSlides: DynamicHeroSlide[] = (heroSlidesDb && heroSlidesDb.length > 0)
+    ? heroSlidesDb.map((s) => ({
+        id: s.id,
+        badge: s.badge || 'জ্ঞান ও প্রজ্ঞার ভাণ্ডার',
+        badgeIcon: s.badgeIcon || 'BookOpen',
+        headline: s.headline,
+        subhead: s.subhead,
+        couponCode: s.couponCode,
+        primaryCtaText: s.primaryCtaText || 'বইয়ের ক্যাটালগ',
+        primaryCtaLink: s.primaryCtaLink || '/books',
+        secondaryCtaText: s.secondaryCtaText,
+        secondaryCtaLink: s.secondaryCtaLink,
+        bgGradient: s.bgGradient,
+        image: s.imageUrl,
+        imageUrl: s.imageUrl,
+      }))
+    : [
+        {
+          id: 'default-hero-1',
+          badge: 'জ্ঞান ও প্রজ্ঞার ভাণ্ডার',
+          badgeIcon: 'BookOpen',
+          headline: 'শুব্বান লাইব্রেরী — বই, জ্ঞান ও মননশীলতার এক সমৃদ্ধ ঠিকানা',
+          subhead: 'হাজারো নির্বাচিত মুদ্রিত বই, বাংলা ই-বুক, গবেষণাপত্র ও সাময়িকীর ডিজিটাল সংগ্রহশালা।',
+          primaryCtaText: 'বইয়ের ক্যাটালগ দেখুন',
+          primaryCtaLink: '/books',
+          secondaryCtaText: 'ইসলামিক এআই জিজ্ঞেস করুন',
+          secondaryCtaLink: '/islamic-ai',
+          bgGradient: 'from-emerald-950 via-teal-900 to-stone-900',
+        },
+      ];
 
   // Default fallback sections if DB table is unseeded
   const fallbackSections = [

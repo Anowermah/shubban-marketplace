@@ -10,7 +10,8 @@ const memoryCache = new Map<string, CacheEntry<any>>();
 export async function getCachedData<T>(
   key: string,
   ttlSeconds: number,
-  fetchFn: () => Promise<T>
+  fetchFn: () => Promise<T>,
+  fallbackValue?: T
 ): Promise<T> {
   const now = Date.now();
   const cached = memoryCache.get(key);
@@ -19,13 +20,20 @@ export async function getCachedData<T>(
     return cached.data;
   }
 
-  const freshData = await fetchFn();
-  memoryCache.set(key, {
-    data: freshData,
-    expiresAt: now + ttlSeconds * 1000,
-  });
-
-  return freshData;
+  try {
+    const freshData = await fetchFn();
+    memoryCache.set(key, {
+      data: freshData,
+      expiresAt: now + ttlSeconds * 1000,
+    });
+    return freshData;
+  } catch (error) {
+    console.warn(`[Cache] Failed to fetch data for key "${key}", using fallback:`, error);
+    if (cached?.data) {
+      return cached.data;
+    }
+    return (fallbackValue !== undefined ? fallbackValue : ([] as unknown as T));
+  }
 }
 
 export function invalidateCache(keyPrefix?: string) {
