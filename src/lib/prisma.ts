@@ -14,7 +14,10 @@ function resolveDatabaseUrl(): string {
   const possiblePaths = [
     path.join(cwd, 'prisma', 'dev.db'),
     path.join(cwd, 'dev.db'),
+    path.join(cwd, '.next', 'server', 'prisma', 'dev.db'),
+    path.join(cwd, '.next', 'standalone', 'prisma', 'dev.db'),
     path.resolve(cwd, '..', 'prisma', 'dev.db'),
+    '/var/task/prisma/dev.db',
   ];
 
   let sourceDbPath = '';
