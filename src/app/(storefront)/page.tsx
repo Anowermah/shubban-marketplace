@@ -276,34 +276,34 @@ export default async function HomePage() {
   // Transform hero slides into format expected by slider
   const initialHeroSlides: DynamicHeroSlide[] = (heroSlidesDb && heroSlidesDb.length > 0)
     ? heroSlidesDb.map((s) => ({
-        id: s.id,
-        badge: s.badge || 'জ্ঞান ও প্রজ্ঞার ভাণ্ডার',
-        badgeIcon: s.badgeIcon || 'BookOpen',
-        headline: s.headline,
-        subhead: s.subhead,
-        couponCode: s.couponCode,
-        primaryCtaText: s.primaryCtaText || 'বইয়ের ক্যাটালগ',
-        primaryCtaLink: s.primaryCtaLink || '/books',
-        secondaryCtaText: s.secondaryCtaText,
-        secondaryCtaLink: s.secondaryCtaLink,
-        bgGradient: s.bgGradient,
-        image: s.imageUrl,
-        imageUrl: s.imageUrl,
-      }))
+      id: s.id,
+      badge: s.badge || 'জ্ঞান ও প্রজ্ঞার ভাণ্ডার',
+      badgeIcon: s.badgeIcon || 'BookOpen',
+      headline: s.headline,
+      subhead: s.subhead,
+      couponCode: s.couponCode,
+      primaryCtaText: s.primaryCtaText || 'বইয়ের ক্যাটালগ',
+      primaryCtaLink: s.primaryCtaLink || '/books',
+      secondaryCtaText: s.secondaryCtaText,
+      secondaryCtaLink: s.secondaryCtaLink,
+      bgGradient: s.bgGradient,
+      image: s.imageUrl,
+      imageUrl: s.imageUrl,
+    }))
     : [
-        {
-          id: 'default-hero-1',
-          badge: 'জ্ঞান ও প্রজ্ঞার ভাণ্ডার',
-          badgeIcon: 'BookOpen',
-          headline: 'শুব্বান লাইব্রেরী — বই, জ্ঞান ও মননশীলতার এক সমৃদ্ধ ঠিকানা',
-          subhead: 'হাজারো নির্বাচিত মুদ্রিত বই, বাংলা ই-বুক, গবেষণাপত্র ও সাময়িকীর ডিজিটাল সংগ্রহশালা।',
-          primaryCtaText: 'বইয়ের ক্যাটালগ দেখুন',
-          primaryCtaLink: '/books',
-          secondaryCtaText: 'ইসলামিক এআই জিজ্ঞেস করুন',
-          secondaryCtaLink: '/islamic-ai',
-          bgGradient: 'from-emerald-950 via-teal-900 to-stone-900',
-        },
-      ];
+      {
+        id: 'default-hero-1',
+        badge: 'জ্ঞান ও প্রজ্ঞার ভাণ্ডার',
+        badgeIcon: 'BookOpen',
+        headline: 'শুব্বান লাইব্রেরী — বই, জ্ঞান ও মননশীলতার এক সমৃদ্ধ ঠিকানা',
+        subhead: 'হাজারো নির্বাচিত মুদ্রিত বই, বাংলা ই-বুক, গবেষণাপত্র ও সাময়িকীর ডিজিটাল সংগ্রহশালা।',
+        primaryCtaText: 'বইয়ের ক্যাটালগ দেখুন',
+        primaryCtaLink: '/books',
+        secondaryCtaText: 'ইসলামিক এআই জিজ্ঞেস করুন',
+        secondaryCtaLink: '/islamic-ai',
+        bgGradient: 'from-emerald-950 via-teal-900 to-stone-900',
+      },
+    ];
 
   // Default fallback sections if DB table is unseeded
   const fallbackSections = [
@@ -396,7 +396,7 @@ export default async function HomePage() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-4 md:gap-6">
               {featuredBooks.map((book) => (
                 <BookCard key={book.id} book={book} />
               ))}
@@ -432,7 +432,7 @@ export default async function HomePage() {
                 </Link>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-4 md:gap-6">
                 {freeBooks.map((book) => (
                   <BookCard key={book.id} book={book} />
                 ))}
@@ -547,7 +547,7 @@ export default async function HomePage() {
                 </Link>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-4 md:gap-6">
                 {islamicBooks.map((book) => (
                   <BookCard key={book.id} book={book} />
                 ))}
@@ -699,10 +699,10 @@ export default async function HomePage() {
                           {camp.category === 'RELIEF'
                             ? 'জরুরি ত্রাণ'
                             : camp.category === 'QURAN_DISTRIBUTION'
-                            ? 'কুরআন বিতরণ'
-                            : camp.category === 'WATER_WELL'
-                            ? 'বিশুদ্ধ পানি'
-                            : 'সদকায়ে জারিয়া'}
+                              ? 'কুরআন বিতরণ'
+                              : camp.category === 'WATER_WELL'
+                                ? 'বিশুদ্ধ পানি'
+                                : 'সদকায়ে জারিয়া'}
                         </span>
                       </div>
 

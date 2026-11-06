@@ -26,8 +26,8 @@ export default function MobileBottomNav() {
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-shubban-darkBg/95 backdrop-blur-md border-t border-stone-200 dark:border-stone-800 py-1.5 px-3 font-bengali">
-      <div className="flex items-center justify-around">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-shubban-darkBg/95 backdrop-blur-md border-t border-stone-200 dark:border-stone-800 py-1 px-2 font-bengali pb-[max(env(safe-area-inset-bottom),6px)] shadow-lg">
+      <div className="flex items-center justify-around max-w-md mx-auto">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
@@ -35,21 +35,21 @@ export default function MobileBottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center py-1 px-2.5 rounded-lg text-[11px] font-medium transition-colors relative ${
+              className={`flex flex-col items-center py-1 px-2 rounded-lg text-[10px] sm:text-[11px] font-medium transition-colors relative ${
                 isActive
                   ? 'text-shubban-green dark:text-shubban-gold font-bold'
                   : 'text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
               }`}
             >
               <div className="relative">
-                <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5]' : 'stroke-[1.75]'}`} />
+                <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${isActive ? 'stroke-[2.5]' : 'stroke-[1.75]'}`} />
                 {item.count !== undefined && item.count > 0 && (
-                  <span className="absolute -top-1.5 -right-2 w-4 h-4 rounded-full bg-shubban-gold text-white text-[9px] font-bold flex items-center justify-center">
+                  <span className="absolute -top-1.5 -right-2 w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-shubban-gold text-white text-[8px] sm:text-[9px] font-bold flex items-center justify-center">
                     {toBengaliNumber(item.count)}
                   </span>
                 )}
               </div>
-              <span className="mt-0.5">{item.label}</span>
+              <span className="mt-0.5 leading-none">{item.label}</span>
             </Link>
           );
         })}

@@ -108,22 +108,22 @@ export default function FloatingAdPopup({
     return null;
   }
 
-  // Minimized Floating Pill Badge (Bottom-Left on Desktop, Top-Left on Mobile)
+  // Minimized Floating Pill Badge (Bottom-Left on all devices)
   if (isMinimized) {
     return (
       <aside
         aria-label="শিক্ষা নোটিশ সংক্ষেপ"
-        className="fixed top-18 sm:top-auto sm:bottom-6 left-3 sm:left-6 z-30 font-bengali animate-in fade-in zoom-in-90 duration-300"
+        className="fixed bottom-16 sm:bottom-6 left-3 sm:left-6 z-30 font-bengali animate-in fade-in zoom-in-90 duration-300"
       >
         <button
           onClick={handleToggleMinimize}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-stone-900 border border-amber-500/40 text-stone-800 dark:text-stone-200 text-xs font-bold shadow-lg hover:border-amber-500 hover:scale-105 transition-all"
+          className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-full bg-white dark:bg-stone-900 border border-amber-500/40 text-stone-800 dark:text-stone-200 text-xs font-bold shadow-lg hover:border-amber-500 hover:scale-105 transition-all"
           title="শিক্ষা ও ভর্তি নোটিশ দেখুন"
         >
           <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
           <GraduationCap className="w-3.5 h-3.5 text-amber-600" />
           <span>শিক্ষা নোটিশ</span>
-          <span className="text-[10px] text-stone-400 font-normal">দেখুন &uarr;</span>
+          <span className="text-[10px] text-stone-400 font-normal">&uarr;</span>
         </button>
       </aside>
     );
@@ -132,9 +132,9 @@ export default function FloatingAdPopup({
   return (
     <aside
       aria-label="শিক্ষা প্রতিষ্ঠান বিজ্ঞাপন নোটিশ"
-      className="fixed top-18 left-3 right-3 sm:top-auto sm:bottom-6 sm:left-6 sm:right-auto z-30 w-auto sm:w-[330px] max-w-[360px] mx-auto sm:mx-0 animate-in fade-in slide-in-from-top-4 sm:slide-in-from-bottom-5 sm:slide-in-from-left-5 duration-500 font-bengali pointer-events-auto"
+      className="fixed bottom-16 left-3 right-auto sm:bottom-6 sm:left-6 z-30 w-[calc(100vw-1.5rem)] max-w-[320px] sm:w-[330px] animate-in fade-in slide-in-from-bottom-5 duration-500 font-bengali pointer-events-auto"
     >
-      <div className="relative rounded-2xl bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border border-amber-500/30 dark:border-stone-800 shadow-2xl overflow-hidden p-3.5 transition-all hover:border-amber-400/60">
+      <div className="relative rounded-2xl bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border border-amber-500/30 dark:border-stone-800 shadow-2xl overflow-hidden p-3 transition-all hover:border-amber-400/60">
         {/* Header / Top Bar: Educational Badge + Minimize & Skip Buttons */}
         <div className="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-stone-100 dark:border-stone-800">
           <div className="flex items-center gap-1.5 min-w-0">

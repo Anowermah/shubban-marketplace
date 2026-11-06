@@ -205,23 +205,23 @@ export default function FloatingIslamicAiWidget() {
   const whatsappBaseMessage = hotline?.config.whatsappDefaultMessage || 'আসসালামু আলাইকুম। শুব্বান লাইব্রেরী থেকে ইসলামিক পরামর্শ চাই।';
 
   return (
-    <div className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 font-bengali">
+    <div className="fixed bottom-16 right-3 sm:bottom-6 sm:right-6 z-40 font-bengali">
       {/* Floating Launcher Button */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
           suppressHydrationWarning
-          className="group relative flex items-center gap-2.5 px-4 py-3 bg-gradient-to-r from-emerald-800 to-emerald-950 text-white rounded-full shadow-2xl hover:shadow-emerald-900/50 border border-amber-400/50 transition-all duration-300 hover:scale-105 active:scale-95"
+          className="group relative flex items-center gap-2 sm:gap-2.5 px-3 sm:px-4 py-2 sm:py-3 bg-gradient-to-r from-emerald-800 to-emerald-950 text-white rounded-full shadow-2xl hover:shadow-emerald-900/50 border border-amber-400/50 transition-all duration-300 hover:scale-105 active:scale-95"
           aria-label="ইসলামিক এআই সহকারী ও শাইখ হটলাইন"
         >
           <span className="relative inline-flex items-center">
-            <Sparkles className="w-5 h-5 text-amber-300 animate-pulse" />
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-400 rounded-full animate-ping" />
+            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-amber-300 animate-pulse" />
+            <span className="absolute -top-1 -right-1 w-2 sm:w-2.5 h-2 sm:h-2.5 bg-amber-400 rounded-full animate-ping" />
           </span>
           <span className="text-xs sm:text-sm font-bold tracking-wide">
             ইসলামিক এআই
           </span>
-          <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-700/80 text-emerald-200 border border-emerald-500/40 font-semibold">
+          <span className="hidden xs:inline-flex items-center gap-1 text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full bg-emerald-700/80 text-emerald-200 border border-emerald-500/40 font-semibold">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             <span>লাইভ শাইখ</span>
           </span>
@@ -230,7 +230,7 @@ export default function FloatingIslamicAiWidget() {
 
       {/* Mini Interactive Chat & Hotline Modal */}
       {isOpen && (
-        <div className="w-[92vw] sm:w-[400px] h-[550px] max-h-[85vh] bg-stone-900 text-stone-100 rounded-2xl shadow-2xl border border-emerald-700/50 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="w-[calc(100vw-1.5rem)] sm:w-[400px] h-[520px] max-h-[75vh] bg-stone-900 text-stone-100 rounded-2xl shadow-2xl border border-emerald-700/50 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
           {/* Header */}
           <div className="bg-gradient-to-r from-emerald-950 via-emerald-900 to-emerald-950 px-4 py-3 border-b border-emerald-800 flex items-center justify-between">
             <div className="flex items-center gap-2">

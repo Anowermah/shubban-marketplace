@@ -15,22 +15,22 @@ export default function Logo({
   whiteText = false,
 }: LogoProps) {
   const iconSizes = {
-    sm: 'w-8 h-8',
-    md: 'w-10 h-10',
-    lg: 'w-14 h-14',
+    sm: 'w-7 h-7 sm:w-8 sm:h-8',
+    md: 'w-8 h-8 sm:w-10 sm:h-10',
+    lg: 'w-10 h-10 sm:w-14 sm:h-14',
   };
 
   const titleSizes = {
-    sm: 'text-lg',
-    md: 'text-2xl',
-    lg: 'text-3xl',
+    sm: 'text-base sm:text-lg',
+    md: 'text-lg sm:text-2xl',
+    lg: 'text-xl sm:text-3xl',
   };
 
   return (
-    <Link href="/" className={`inline-flex items-center gap-3 group focus:outline-none ${className}`}>
+    <Link href="/" className={`inline-flex items-center gap-2 sm:gap-3 group focus:outline-none flex-shrink-0 ${className}`}>
       {/* Brand Icon: Book + Ascending Flame / Knowledge Motif */}
       <div
-        className={`${iconSizes[size]} relative flex items-center justify-center rounded-xl bg-shubban-green shadow-md border border-shubban-gold/40 text-shubban-gold transition-transform group-hover:scale-105 overflow-hidden flex-shrink-0`}
+        className={`${iconSizes[size]} relative flex items-center justify-center rounded-lg sm:rounded-xl bg-shubban-green shadow-md border border-shubban-gold/40 text-shubban-gold transition-transform group-hover:scale-105 overflow-hidden flex-shrink-0`}
       >
         <svg
           viewBox="0 0 48 48"
@@ -97,7 +97,7 @@ export default function Logo({
 
       {/* Brand Title and Tagline */}
       <div className="flex flex-col">
-        <div className="flex items-baseline gap-1.5">
+        <div className="flex items-baseline gap-1 sm:gap-1.5">
           <span
             className={`font-serif font-bold tracking-tight leading-none ${titleSizes[size]} ${
               whiteText ? 'text-white' : 'text-shubban-green dark:text-shubban-ivory'
@@ -113,7 +113,7 @@ export default function Logo({
         </div>
         {showTagline && (
           <span
-            className={`text-[11px] leading-tight font-bengali tracking-wide mt-0.5 ${
+            className={`hidden md:inline-block text-[11px] leading-tight font-bengali tracking-wide mt-0.5 ${
               whiteText ? 'text-shubban-ivory/80' : 'text-shubban-charcoal-muted dark:text-stone-300'
             }`}
           >

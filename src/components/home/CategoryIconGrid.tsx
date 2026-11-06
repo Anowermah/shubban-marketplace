@@ -120,20 +120,20 @@ export default function CategoryIconGrid() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5 sm:gap-4">
         {CATEGORIES.map((cat) => (
           <Link
             key={cat.id}
             href={cat.href}
-            className={`group p-4 rounded-2xl border text-center flex flex-col items-center justify-center transition-all duration-300 hover:shadow-md hover:-translate-y-1 ${cat.bgLight}`}
+            className={`group p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border text-center flex flex-col items-center justify-center transition-all duration-300 hover:shadow-md hover:-translate-y-1 ${cat.bgLight}`}
           >
-            <div className="p-3 rounded-2xl bg-white dark:bg-stone-800 shadow-sm border border-stone-200/50 dark:border-stone-700 group-hover:scale-110 transition-transform mb-2.5">
+            <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-white dark:bg-stone-800 shadow-sm border border-stone-200/50 dark:border-stone-700 group-hover:scale-110 transition-transform mb-2">
               {cat.icon}
             </div>
-            <h3 className="font-bold text-xs sm:text-sm text-stone-900 dark:text-stone-100 group-hover:text-shubban-gold transition-colors line-clamp-1">
+            <h3 className="font-bold text-[11px] sm:text-sm text-stone-900 dark:text-stone-100 group-hover:text-shubban-gold transition-colors line-clamp-1">
               {cat.name}
             </h3>
-            <span className="text-[10px] text-stone-500 dark:text-stone-400 mt-0.5 line-clamp-1">
+            <span className="text-[9px] sm:text-[10px] text-stone-500 dark:text-stone-400 mt-0.5 line-clamp-1">
               {cat.countText}
             </span>
           </Link>

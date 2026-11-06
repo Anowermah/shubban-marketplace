@@ -345,34 +345,34 @@ export default function Header() {
         </div>
 
         {/* Main Header Bar */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20 gap-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 sm:h-20 gap-2 sm:gap-4">
             {/* Logo & Mobile Menu Trigger */}
-            <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
               {/* Animated Hamburger Button */}
               <button
                 type="button"
                 onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-                className="lg:hidden relative w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex flex-col items-center justify-center gap-1.5 text-stone-900 dark:text-stone-100 bg-stone-100 hover:bg-stone-200/90 dark:bg-stone-800/90 dark:hover:bg-stone-700/90 border border-stone-200/90 dark:border-stone-700/80 hover:border-shubban-gold/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-shubban-gold transition-all active:scale-95 flex-shrink-0 shadow-xs"
+                className="lg:hidden relative w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex flex-col items-center justify-center gap-1.5 text-stone-900 dark:text-stone-100 bg-stone-100 hover:bg-stone-200/90 dark:bg-stone-800/90 dark:hover:bg-stone-700/90 border border-stone-200/90 dark:border-stone-700/80 hover:border-shubban-gold/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-shubban-gold transition-all active:scale-95 flex-shrink-0 shadow-xs"
                 aria-label={isMobileMenuOpen ? 'মেনু বন্ধ করুন' : 'প্রধান মেনু খুলুন'}
                 aria-expanded={isMobileMenuOpen}
                 aria-controls="mobile-navigation-drawer"
               >
                 <span
-                  className={`block h-[3px] w-6 sm:w-6.5 rounded-full transition-all duration-300 ease-in-out ${isMobileMenuOpen
-                      ? 'rotate-45 translate-y-[9px] bg-shubban-gold'
+                  className={`block h-[2.5px] w-5 sm:w-6.5 rounded-full transition-all duration-300 ease-in-out ${isMobileMenuOpen
+                      ? 'rotate-45 translate-y-[8px] bg-shubban-gold'
                       : 'bg-stone-900 dark:bg-stone-100'
                     }`}
                 />
                 <span
-                  className={`block h-[3px] w-6 sm:w-6.5 rounded-full transition-all duration-200 ease-in-out ${isMobileMenuOpen
+                  className={`block h-[2.5px] w-5 sm:w-6.5 rounded-full transition-all duration-200 ease-in-out ${isMobileMenuOpen
                       ? 'opacity-0 scale-x-0'
                       : 'bg-stone-900 dark:bg-stone-100'
                     }`}
                 />
                 <span
-                  className={`block h-[3px] w-6 sm:w-6.5 rounded-full transition-all duration-300 ease-in-out ${isMobileMenuOpen
-                      ? '-rotate-45 -translate-y-[9px] bg-shubban-gold'
+                  className={`block h-[2.5px] w-5 sm:w-6.5 rounded-full transition-all duration-300 ease-in-out ${isMobileMenuOpen
+                      ? '-rotate-45 -translate-y-[8px] bg-shubban-gold'
                       : 'bg-stone-900 dark:bg-stone-100'
                     }`}
                 />
@@ -533,34 +533,44 @@ export default function Header() {
                 )}
             </div>
 
-            {/* Action Icons: Search (mobile), Notifications, Cart, Account */}
-            <div className="flex items-center gap-2 sm:gap-4">
+            {/* Action Icons: Search (mobile), Theme, Notifications, Cart, Account */}
+            <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
               {/* Mobile Search Button */}
               <button
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
-                className="lg:hidden p-2 rounded-full text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                className="lg:hidden p-1.5 sm:p-2 rounded-full text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
                 aria-label="Search"
               >
                 <Search className="w-5 h-5" />
+              </button>
+
+              {/* Mobile Theme Toggle */}
+              <button
+                onClick={toggleTheme}
+                aria-label="Toggle theme"
+                suppressHydrationWarning
+                className="lg:hidden p-1.5 sm:p-2 rounded-full text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+              >
+                {mounted && theme === 'dark' ? <Sun className="w-5 h-5 text-shubban-gold" /> : <Moon className="w-5 h-5" />}
               </button>
 
               {/* Notifications Dropdown */}
               <div className="relative" ref={notifRef}>
                 <button
                   onClick={() => setShowNotificationPopup(!showNotificationPopup)}
-                  className="relative p-2 rounded-full text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                  className="relative p-1.5 sm:p-2 rounded-full text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
                   aria-label="Notifications"
                 >
                   <Bell className="w-5 h-5" />
                   {unreadNotifications > 0 && (
-                    <span className="absolute top-1 right-1 flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-red-600 rounded-full">
+                    <span className="absolute top-0.5 right-0.5 flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-red-600 rounded-full">
                       {toBengaliNumber(unreadNotifications)}
                     </span>
                   )}
                 </button>
 
                 {showNotificationPopup && (
-                  <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-shubban-darkCard border border-stone-200 dark:border-stone-800 rounded-xl shadow-xl p-4 z-50 font-bengali">
+                  <div className="absolute right-0 mt-2 w-72 sm:w-80 max-w-[calc(100vw-2rem)] bg-white dark:bg-shubban-darkCard border border-stone-200 dark:border-stone-800 rounded-xl shadow-xl p-4 z-50 font-bengali">
                     <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-stone-800">
                       <span className="font-semibold text-stone-900 dark:text-white">বিজ্ঞপ্তি সমূহ</span>
                       <span className="text-xs text-shubban-gold cursor-pointer" onClick={() => setUnreadNotifications(0)}>
@@ -592,10 +602,10 @@ export default function Header() {
                 )}
               </div>
 
-              {/* Wishlist Button (Heart) */}
+              {/* Wishlist Button (Heart) - Visible from sm up */}
               <Link
                 href="/account/bookmarks"
-                className="relative p-2 rounded-full text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                className="hidden sm:flex relative p-2 rounded-full text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
                 aria-label="Wishlist"
                 title="পছন্দ তালিকা (Wishlist)"
               >
@@ -610,19 +620,19 @@ export default function Header() {
               {/* Shopping Cart Button */}
               <Link
                 href="/cart"
-                className="relative p-2 rounded-full text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                className="relative p-1.5 sm:p-2 rounded-full text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
                 aria-label="Shopping Cart"
               >
                 <ShoppingCart className="w-5 h-5" />
                 {totalCartCount > 0 && (
-                  <span className="absolute top-1 right-1 flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-shubban-gold rounded-full shadow">
+                  <span className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-shubban-gold rounded-full shadow">
                     {toBengaliNumber(totalCartCount)}
                   </span>
                 )}
               </Link>
 
-              {/* User Account Menu */}
-              <div className="relative" ref={userMenuRef}>
+              {/* User Account Menu - Visible on md+ desktop, accessible via bottom nav on mobile */}
+              <div className="hidden md:block relative" ref={userMenuRef}>
                 {user ? (
                   <div>
                     <button
@@ -763,7 +773,7 @@ export default function Header() {
                     )}
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2">
+                  <div className="hidden sm:flex items-center gap-2">
                     <Link
                       href="/login"
                       className="px-3.5 py-1.5 rounded-lg text-xs font-bengali font-medium text-shubban-green dark:text-shubban-ivory hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
