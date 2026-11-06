@@ -39,6 +39,9 @@ export default function ErrorBoundary({
 
   const handleReset = async () => {
     try {
+      if (typeof reset === 'function') {
+        reset();
+      }
       if (typeof window !== 'undefined' && 'caches' in window) {
         const keys = await caches.keys();
         await Promise.all(keys.map((k) => caches.delete(k)));
@@ -93,8 +96,11 @@ export default function ErrorBoundary({
           </Link>
         </div>
 
-        <div className="pt-4 border-t border-stone-100 dark:border-stone-800 text-[11px] text-stone-400">
-          হেল্পলাইন: +৮৮০ ১৭১১-০০০০০০ (সকাল ৯টা - রাত ৯টা)
+        <div className="pt-4 border-t border-stone-100 dark:border-stone-800 text-[11px] text-stone-400 flex items-center justify-between px-2">
+          <span>হেল্পলাইন: +৮৮০ ১৭১১-০০০০০০</span>
+          <Link href="/login" className="text-shubban-gold hover:underline">
+            লগইন পেজ
+          </Link>
         </div>
       </div>
     </div>

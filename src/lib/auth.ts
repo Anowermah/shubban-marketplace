@@ -296,80 +296,128 @@ export async function getCurrentUserWithProfile() {
   const session = await getSessionUser();
   if (!session) return null;
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.id },
-    select: {
-      id: true,
-      email: true,
-      name: true,
-      username: true,
-      phone: true,
-      role: true,
-      status: true,
-      avatarUrl: true,
-      bio: true,
-      gender: true,
-      dateOfBirth: true,
-      country: true,
-      division: true,
-      city: true,
-      area: true,
-      postalCode: true,
-      fullAddress: true,
-      isVerified: true,
-      isPhoneVerified: true,
-      membershipTier: true,
-      membershipExpiry: true,
-      createdAt: true,
-      staffProfile: {
-        include: {
-          department: true,
-          designation: true,
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: session.id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        username: true,
+        phone: true,
+        role: true,
+        status: true,
+        avatarUrl: true,
+        bio: true,
+        gender: true,
+        dateOfBirth: true,
+        country: true,
+        division: true,
+        city: true,
+        area: true,
+        postalCode: true,
+        fullAddress: true,
+        isVerified: true,
+        isPhoneVerified: true,
+        membershipTier: true,
+        membershipExpiry: true,
+        createdAt: true,
+        staffProfile: {
+          include: {
+            department: true,
+            designation: true,
+          },
+        },
+        advertisersOwned: {
+          select: { id: true, companyName: true, status: true },
+        },
+        advertiserMemberships: {
+          include: { advertiser: true },
+        },
+        publisherProfile: {
+          select: { id: true, name: true, status: true },
+        },
+        publisherMemberships: {
+          include: { publisher: true },
+        },
+        publicationMemberships: {
+          include: { magazine: true },
+        },
+        vendorMembers: {
+          include: { vendor: true },
         },
       },
-      advertisersOwned: {
-        select: { id: true, companyName: true, status: true },
-      },
-      advertiserMemberships: {
-        include: { advertiser: true },
-      },
-      publisherProfile: {
-        select: { id: true, name: true, status: true },
-      },
-      publisherMemberships: {
-        include: { publisher: true },
-      },
-      publicationMemberships: {
-        include: { magazine: true },
-      },
-      vendorMembers: {
-        include: { vendor: true },
-      },
-    },
-  });
+    });
 
-  if (!user || user.status === 'SUSPENDED' || user.status === 'BLOCKED') {
-    return null;
+    if (!user || user.status === 'SUSPENDED' || user.status === 'BLOCKED') {
+      return null;
+    }
+
+    const workspaces = resolveUserWorkspaces(user);
+
+    return {
+      ...user,
+      workspaces,
+      isStaff: isStaff(user.role) || !!user.staffProfile,
+      isPublisher:
+        ['PUBLISHER', 'MAGAZINE_ADMIN', 'EDITOR', 'SUPER_ADMIN', 'ADMIN'].includes(user.role) ||
+        !!user.publisherProfile ||
+        (user.publisherMemberships?.length ?? 0) > 0,
+      isAdvertiser:
+        (user.advertisersOwned?.length ?? 0) > 0 ||
+        (user.advertiserMemberships?.length ?? 0) > 0 ||
+        ['SUPER_ADMIN', 'ADMIN'].includes(user.role),
+      isVendor:
+        (user.vendorMembers?.length ?? 0) > 0 ||
+        ['SELLER', 'PUBLISHER', 'SUPER_ADMIN', 'ADMIN'].includes(user.role),
+    };
+  } catch (err) {
+    console.warn('[Auth] Database user query failed, falling back to JWT session payload:', err);
+    // Safe resilient fallback using session JWT payload
+    const fallbackWorkspaces = (session.workspaces || ['customer']).map((w: string) => ({
+      key: w as any,
+      title: w === 'admin' ? 'প্রশাসন কনসোল' : w === 'publisher' ? 'প্রকাশক ড্যাশবোর্ড' : 'গ্রাহক অ্যাকাউন্ট',
+      description: 'ওয়ার্কস্পেস',
+      href: w === 'admin' ? '/admin' : w === 'publisher' ? '/publisher/dashboard' : '/account',
+    }));
+
+    return {
+      id: session.id,
+      email: session.email,
+      name: session.name || 'ইউজার',
+      username: session.email ? session.email.split('@')[0] : 'user',
+      phone: null,
+      role: session.role || 'REGISTERED_MEMBER',
+      status: 'ACTIVE',
+      avatarUrl: null,
+      bio: null,
+      gender: null,
+      dateOfBirth: null,
+      country: 'বাংলাদেশ',
+      division: null,
+      city: null,
+      area: null,
+      postalCode: null,
+      fullAddress: null,
+      isVerified: true,
+      isPhoneVerified: false,
+      membershipTier: session.membershipTier || 'FREE',
+      membershipExpiry: null,
+      createdAt: new Date(),
+      staffProfile: null,
+      advertisersOwned: [],
+      advertiserMemberships: [],
+      publisherProfile: null,
+      publisherMemberships: [],
+      publicationMemberships: [],
+      vendorMembers: [],
+      workspaces: fallbackWorkspaces,
+      isStaff: session.isStaff ?? ['SUPER_ADMIN', 'ADMIN', 'STAFF'].includes(session.role),
+      isPublisher: session.isPublisher ?? ['PUBLISHER', 'MAGAZINE_ADMIN', 'EDITOR', 'SUPER_ADMIN', 'ADMIN'].includes(session.role),
+      isAdvertiser: session.isAdvertiser ?? ['SUPER_ADMIN', 'ADMIN'].includes(session.role),
+      isVendor: session.isVendor ?? ['SELLER', 'PUBLISHER', 'SUPER_ADMIN', 'ADMIN'].includes(session.role),
+    };
   }
-
-  const workspaces = resolveUserWorkspaces(user);
-
-  return {
-    ...user,
-    workspaces,
-    isStaff: isStaff(user.role) || !!user.staffProfile,
-    isPublisher:
-      ['PUBLISHER', 'MAGAZINE_ADMIN', 'EDITOR', 'SUPER_ADMIN', 'ADMIN'].includes(user.role) ||
-      !!user.publisherProfile ||
-      (user.publisherMemberships?.length ?? 0) > 0,
-    isAdvertiser:
-      (user.advertisersOwned?.length ?? 0) > 0 ||
-      (user.advertiserMemberships?.length ?? 0) > 0 ||
-      ['SUPER_ADMIN', 'ADMIN'].includes(user.role),
-    isVendor:
-      (user.vendorMembers?.length ?? 0) > 0 ||
-      ['SELLER', 'PUBLISHER', 'SUPER_ADMIN', 'ADMIN'].includes(user.role),
-  };
 }
 
 // Role Hierarchy and Permission checking

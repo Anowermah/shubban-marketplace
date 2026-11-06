@@ -86,17 +86,24 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'ভুল ইমেইল বা পাসওয়ার্ড।' }, { status: 401 });
     }
 
+    // Safe non-blocking audit logging helper for read-only cloud environments
+    const safeAuditLog = async (data: any) => {
+      try {
+        await prisma.auditLog.create({ data });
+      } catch (err) {
+        console.warn('[AuditLog] Non-critical write ignored in read-only environment:', err);
+      }
+    };
+
     // Check account status: blocked or suspended users cannot login
     if (user.status === 'SUSPENDED' || user.status === 'BLOCKED') {
-      await prisma.auditLog.create({
-        data: {
-          userId: user.id,
-          action: 'LOGIN_BLOCKED_SUSPENDED',
-          entity: 'User',
-          entityId: user.id,
-          ipAddress: clientIp,
-          details: JSON.stringify({ email: cleanEmail, status: user.status, portal }),
-        },
+      await safeAuditLog({
+        userId: user.id,
+        action: 'LOGIN_BLOCKED_SUSPENDED',
+        entity: 'User',
+        entityId: user.id,
+        ipAddress: clientIp,
+        details: JSON.stringify({ email: cleanEmail, status: user.status, portal }),
       });
 
       return NextResponse.json(
@@ -112,16 +119,14 @@ export async function POST(req: Request) {
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
-      // Log failed login audit
-      await prisma.auditLog.create({
-        data: {
-          userId: user.id,
-          action: 'LOGIN_FAILED',
-          entity: 'User',
-          entityId: user.id,
-          ipAddress: clientIp,
-          details: JSON.stringify({ email: cleanEmail, reason: 'INVALID_PASSWORD', portal }),
-        },
+      // Log failed login audit safely
+      await safeAuditLog({
+        userId: user.id,
+        action: 'LOGIN_FAILED',
+        entity: 'User',
+        entityId: user.id,
+        ipAddress: clientIp,
+        details: JSON.stringify({ email: cleanEmail, reason: 'INVALID_PASSWORD', portal }),
       });
 
       return NextResponse.json({ error: 'ভুল ইমেইল বা পাসওয়ার্ড।' }, { status: 401 });
@@ -147,20 +152,18 @@ export async function POST(req: Request) {
     // 1. Admin/Staff Portal Boundary
     if (portal === 'admin' || portal === 'staff') {
       if (!userIsStaff && !isAdmin(user.role)) {
-        await prisma.auditLog.create({
-          data: {
-            userId: user.id,
-            action: 'LOGIN_PORTAL_FORBIDDEN',
-            entity: 'User',
-            entityId: user.id,
-            ipAddress: clientIp,
-            details: JSON.stringify({
-              email: cleanEmail,
-              requestedPortal: portal,
-              userRole: user.role,
-              reason: 'NON_ADMIN_ATTEMPTED_ADMIN_LOGIN',
-            }),
-          },
+        await safeAuditLog({
+          userId: user.id,
+          action: 'LOGIN_PORTAL_FORBIDDEN',
+          entity: 'User',
+          entityId: user.id,
+          ipAddress: clientIp,
+          details: JSON.stringify({
+            email: cleanEmail,
+            requestedPortal: portal,
+            userRole: user.role,
+            reason: 'NON_ADMIN_ATTEMPTED_ADMIN_LOGIN',
+          }),
         });
 
         return NextResponse.json(
@@ -176,20 +179,18 @@ export async function POST(req: Request) {
     // 2. Publisher Portal Boundary
     if (portal === 'publisher') {
       if (!userIsPublisher) {
-        await prisma.auditLog.create({
-          data: {
-            userId: user.id,
-            action: 'LOGIN_PORTAL_FORBIDDEN',
-            entity: 'User',
-            entityId: user.id,
-            ipAddress: clientIp,
-            details: JSON.stringify({
-              email: cleanEmail,
-              requestedPortal: portal,
-              userRole: user.role,
-              reason: 'NON_PUBLISHER_ATTEMPTED_PUBLISHER_LOGIN',
-            }),
-          },
+        await safeAuditLog({
+          userId: user.id,
+          action: 'LOGIN_PORTAL_FORBIDDEN',
+          entity: 'User',
+          entityId: user.id,
+          ipAddress: clientIp,
+          details: JSON.stringify({
+            email: cleanEmail,
+            requestedPortal: portal,
+            userRole: user.role,
+            reason: 'NON_PUBLISHER_ATTEMPTED_PUBLISHER_LOGIN',
+          }),
         });
 
         return NextResponse.json(
@@ -221,28 +222,30 @@ export async function POST(req: Request) {
 
     const token = signToken(sessionUser);
 
-    // Update lastLoginAt
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { lastLoginAt: new Date() },
-    });
+    // Update lastLoginAt safely in cloud/read-only environments
+    try {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { lastLoginAt: new Date() },
+      });
+    } catch (err) {
+      console.warn('[User] lastLoginAt update skipped in read-only environment');
+    }
 
-    // Log successful login audit
-    await prisma.auditLog.create({
-      data: {
-        userId: user.id,
-        action: 'LOGIN_SUCCESS',
-        entity: 'User',
-        entityId: user.id,
-        ipAddress: clientIp,
-        details: JSON.stringify({
-          email: cleanEmail,
-          role: user.role,
-          portal: portal || 'default',
-          redirectTo,
-          workspacesCount: workspaces.length,
-        }),
-      },
+    // Log successful login audit safely
+    await safeAuditLog({
+      userId: user.id,
+      action: 'LOGIN_SUCCESS',
+      entity: 'User',
+      entityId: user.id,
+      ipAddress: clientIp,
+      details: JSON.stringify({
+        email: cleanEmail,
+        role: user.role,
+        portal: portal || 'default',
+        redirectTo,
+        workspacesCount: workspaces.length,
+      }),
     });
 
     const response = NextResponse.json({

@@ -119,22 +119,30 @@ function LoginForm() {
           <Sparkles className="w-3.5 h-3.5 text-shubban-gold" />
           <span>ডেমো লগইন অ্যাকাউন্ট (এক ক্লিকে পরীক্ষা করুন):</span>
         </div>
-        <div className="grid grid-cols-2 gap-2 text-[11px]">
+        <div className="grid grid-cols-3 gap-2 text-[11px]">
           <button
             type="button"
             onClick={() => handleFillDemo('subscriber@shubban.com', 'sub123')}
-            className="p-1.5 rounded bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 hover:border-shubban-gold text-left"
+            className="p-1.5 rounded-xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 hover:border-shubban-gold text-left transition-colors"
           >
-            <span className="font-bold block text-blue-600">ডিজিটাল মেম্বার</span>
-            <span className="text-stone-400 text-[10px]">subscriber@shubban.com</span>
+            <span className="font-bold block text-blue-600 truncate">ডিজিটাল মেম্বার</span>
+            <span className="text-stone-400 text-[9px] truncate block">subscriber@...</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleFillDemo('reader@shubban.com', 'reader123')}
+            className="p-1.5 rounded-xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 hover:border-shubban-gold text-left transition-colors"
+          >
+            <span className="font-bold block text-emerald-600 truncate">সাধারণ পাঠক</span>
+            <span className="text-stone-400 text-[9px] truncate block">reader@...</span>
           </button>
           <button
             type="button"
             onClick={() => handleFillDemo('author@shubban.com', 'author123')}
-            className="p-1.5 rounded bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 hover:border-shubban-gold text-left"
+            className="p-1.5 rounded-xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 hover:border-shubban-gold text-left transition-colors"
           >
-            <span className="font-bold block text-purple-600">লেখক ও গবেষক</span>
-            <span className="text-stone-400 text-[10px]">author@shubban.com</span>
+            <span className="font-bold block text-purple-600 truncate">লেখক ও গবেষক</span>
+            <span className="text-stone-400 text-[9px] truncate block">author@...</span>
           </button>
         </div>
       </div>
