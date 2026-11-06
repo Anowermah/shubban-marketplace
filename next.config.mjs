@@ -15,9 +15,6 @@ const nextConfig = {
 
   experimental: {
     optimizePackageImports: ['lucide-react'], // Tree-shake lucide-react to reduce client bundle size
-    outputFileTracingIncludes: {
-      '/**': ['./prisma/dev.db'],
-    },
   },
 
   images: {
