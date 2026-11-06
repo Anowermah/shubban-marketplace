@@ -293,10 +293,6 @@ export async function POST(req: Request) {
     return response;
   } catch (error: any) {
     console.error('Login error:', error);
-    return NextResponse.json({
-      error: 'সার্ভার ত্রুটি ঘটেছে।',
-      debug: error?.message || String(error),
-      code: error?.code,
-    }, { status: 500 });
+    return NextResponse.json({ error: 'সার্ভার ত্রুটি ঘটেছে।' }, { status: 500 });
   }
 }
